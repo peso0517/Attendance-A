@@ -64,7 +64,7 @@ Rails.application.configure do
   
    config.action_mailer.raise_delivery_errors = true
   config.action_mailer.delivery_method = :smtp
-  host = 'app95066123@heroku.com'
+  host = 'stormy-shore-52598.herokuapp.com'
   config.action_mailer.default_url_options = { host: host }
   ActionMailer::Base.smtp_settings = {
     :address        => 'smtp.sendgrid.net',
