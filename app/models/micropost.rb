@@ -6,6 +6,15 @@ class Micropost < ApplicationRecord
   validates :content, presence: true, length: { maximum: 140 }
   validate  :picture_size
   
+   def feed
+    following_ids = "SELECT followed_id FROM relationships
+                     WHERE follower_id = :user_id"
+    Micropost.including_replies(id)
+             .where("user_id IN (#{following_ids})
+                     OR user_id = :user_id", user_id: id)
+   end
+  
+  
   
   private
   
