@@ -1,9 +1,13 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  attendance_time: 2018-09-30 07:03:02
-  leaving_time: 2018-09-30 07:03:02
+  attendance_time: 2018-10-08 07:46:51
+  leaving_time: 2018-10-08 07:46:51
+  user_id: 1
+  user: one
 
 two:
-  attendance_time: 2018-09-30 07:03:02
-  leaving_time: 2018-09-30 07:03:02
+  attendance_time: 2018-10-08 07:46:51
+  leaving_time: 2018-10-08 07:46:51
+  user_id: 1
+  user: two

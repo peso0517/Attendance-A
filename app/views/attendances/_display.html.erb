@@ -1,5 +1,3 @@
-<% provide(:title, @user.name) %>
-
   <table class="tg table-bordered">
     
    <head>
@@ -66,7 +64,7 @@
         <%= @attendance.attendance_time.hour if !@attendance.attendance_time.nil? %>
        </th>
        <th class="tg-0pky">
-         <%= @attendance.attendance_time.min if !@attendance.attendance_time.nil? %>
+        <%= @attendance.attendance_time.min if !@attendance.attendance_time.nil? %>
        </th>
        <th class="tg-0pky"><!-- 自身の勤怠で出社時間と退社時間が空なら表示   -->
          <% if @attendance.attendance_time.nil? && @attendance.leaving_time.nil? && days == Date.today %>
