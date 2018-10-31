@@ -5,13 +5,12 @@
    <head>
     <tr>
      <th class="tg-8ot9"> 
-       <!--#params[:piyo]に前月or翌月の情報を入れてControllerへ渡してあげます 
-          #▼前月の情報を渡す  --->
-       <%= link_to "←", user_path(first_day: @first_day.prev_month) %>
+
+       <%= link_to "◀︎", user_path(first_day: @first_day.prev_month) %>
    
-    　<%= @first_day.year %>年<%= @first_day.month %>月の時間管理表
-         <!-- #▼翌月の情報を渡す -->
-       <%= link_to "→", user_path(first_day: @first_day.next_month) %>
+     　<%= @first_day.year %>年<%= @first_day.month %>月の時間管理表
+
+       <%= link_to "▶️︎", user_path(first_day: @first_day.next_month) %>
 
      </th>
     <th class="tg-8ot9">指定勤務時間:<%= @user.specified_work_time %></th>
@@ -55,35 +54,36 @@
  <!-- ここから下段の出退勤時間登録フォーム-->
     <table class="tg" id="fixed">
      <% (@first_day..@last_day).each do |days| %>
+     <%# @days.each do |d| %>
       <tr>
        <th class="tg-8ot9">
         <%= days.month %>/<%= days.day %>
+        <%#= d.month %><%#= d.day %>
        </th>
        <th class="tg-0pky">
         <%= @youbi[days.wday] %>
-        </th>
-       <th class="tg-0pky">
-        <%= @attendance.attendance_time.hour if !@attendance.attendance_time.nil? %>
+        <%#= @youbi[d.wday] %>
        </th>
-       <th class="tg-0pky">
-         <%= @attendance.attendance_time.min if !@attendance.attendance_time.nil? %>
+       <th>
+       <% @date = Attendance.find_by(day: days, user_id: @user.id) if !Attendance.find_by(day: days, user_id: @user.id).nil? %>
+       <%= @date.attendance_time %>
        </th>
-       <th class="tg-0pky"><!-- 自身の勤怠で出社時間と退社時間が空なら表示   -->
-         <% if @attendance.attendance_time.nil? && @attendance.leaving_time.nil? && days == Date.today %>
-          <%= form_for @attendance, :url => {:controller => 'attendances',:action => 'attend'} do |f| %>
-           <%= f.submit "出社", class: "btn btn-primary" %>
+       <th>
+       <%= @date.attendance_time %>
+       </th>
+       <th>
+         <% if @date.attendance_time.nil? && @leaving_time.nil? && days == Date.today %>
+          <%= button_to "出社",{ controller: 'attendances', action: 'create'},{class: "btn btn-primary"} %>
          <% end %>
-        <% end %>
        </th>
-       <th class="tg-0pky">
-       <!-- #f.datetime_select :attendance_time %> -->
+       <th>
        </th>
-       <th class="tg-0pky">
+       <th>
          
        </th>
-       <th class="tg-0pky"></th>
-       <th class="tg-0pky"></th>
-       <th class="tg-0pky"></th>
+       <th></th>
+       <th></th>
+       <th></th>
       </tr>
      <% end %>
     </table>

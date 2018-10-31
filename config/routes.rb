@@ -6,8 +6,8 @@ Rails.application.routes.draw do
   get    '/signup',  to: 'users#new'
   get    '/login',   to: 'sessions#new'
   
-  get    '/attend', to: 'attendances#attend'
-  post   '/attend', to: 'attendances#attend'
+  #get    '/attend', to: 'attendances#attend'
+  #post   '/attend', to: 'attendances#attend'
   
   get    '/edit_basic_info',   to: 'users#edit_basic_info'
   patch  '/update_basic_info' , to: 'users#update_basic_info'
@@ -15,7 +15,6 @@ Rails.application.routes.draw do
   delete '/logout',  to: 'sessions#destroy'
   
   resources :users do
-  resources :attendances
   member do
   get :following, :followers
    end
@@ -24,4 +23,5 @@ Rails.application.routes.draw do
   resources :password_resets,     only: [:new, :create, :edit, :update]
   resources :microposts,          only: [:create, :destroy]
   resources :relationships,       only: [:create, :destroy]
+  resources :attendances
 end

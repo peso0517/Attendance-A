@@ -58,8 +58,6 @@ ActiveRecord::Schema.define(version: 20181014090517) do
     t.string "affiliation"
     t.datetime "specified_work_time"
     t.datetime "basic_work_time"
-    t.datetime "attendance_time"
-    t.datetime "leaving_time"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
