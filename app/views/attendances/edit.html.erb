@@ -1,0 +1,71 @@
+ <% provide(:title,"勤怠編集画面" ) %>
+
+  <div>
+   <h1>勤怠編集画面</h1>
+  
+    <table class = "table attendance-table table-striped table-bordered table-hover">
+    <!--勤怠情報表示ヘッダー-->
+     <thead>
+      <!--１列目-->
+      <tr>
+        <!--rowspan:縦結合、colspan：横結合-->
+       <th rowspan = "2">日付</th>
+       <th rowspan = "2">曜日</th>
+       <th colspan = "3">出社</th>
+       <th colspan = "3">退社</th>
+       <th rowspan = "2">在社時間</th>
+       <th rowspan = "2">備考</th>
+       <th rowspan = "2">残業指示</th>
+       <th rowspan = "2">指示者</th>
+      </tr>
+     </thead>
+  
+  <!--勤怠編集テーブル-->
+   <tbody>
+    <tr>
+    <%= form_for(@user, url: attendance_update_path, method: :post) do |f| %>
+     <%= hidden_field_tag :id, @user.id %>
+     <%= hidden_field_tag :first_day, @first_day %>
+      <% @days.each do |d| %>
+      
+       <%= fields_for "attendances[]", d do |tf| %>
+        
+        <!--１列目：日付-->
+        <td class = "edit-table"><%= d.day.month %>/<%= d.day.day %></td>
+       
+        <!--２列目：曜日-->
+        <td class = "edit-table"><%= @youbi[d.day.wday] %></td>
+       
+        <!--３〜５列目：出社時間表示（データが存在する場合）-->
+        <td colspan = "3" class = "edit-table"><%= tf.time_field :attendance_time, class: 'form-control' %></td>
+      
+      <!--６〜８列目：退社時間表示(データが存在する場合)-->
+      <td colspan = "3"  class = "edit-table"><%= tf.time_field :leaving_time, class: 'form-control' %></td>
+       
+       <!--９列目：在社時間表示-->
+      <td  class = "edit-table"><%= working_times(d.attendance_time,d.leaving_time) if d.attendance_time.present? && d.leaving_time.present? %></td>
+       
+       <!--１０列目：備考（空欄）-->
+      <td class = "edit-table"></td>
+       
+       <!--１１列目：残業指示（空欄）-->
+      <td class = "edit-table"></td>
+       
+       <!--１２列目：指示者（空欄）-->
+      <td class = "edit-table"></td>
+     </tr>
+     <% end %>
+    <% end %>
+   </tbody>
+  </table>
+  
+   <center>
+    <br>
+    <%= f.submit "更新", style:"width:300px", class: "btn btn-primary" %>
+    <%= link_to "キャンセル", user_url(@user, params:{first_day: @first_day}),\
+        style:"width:300px", class: "btn btn-default" %>
+    </br>
+   </center>
+  <% end %>
+ </div>
+ 
