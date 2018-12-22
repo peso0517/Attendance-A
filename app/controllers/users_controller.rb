@@ -3,18 +3,19 @@ before_action :logged_in_user, only: [:index, :edit, :update, :destroy]
 before_action :correct_user,   only: [:edit, :update]
 before_action :admin_user,     only: [:destroy, :edit_basic_info]
  
-include UsersHelper
+ include UsersHelper
   
   def index
     @users = User.paginate(page: params[:page])
   end
 
   def show
-   @user = User.find(params[:id])
-   #@attendance = @user.attendances.where(day: Date.current)
-   #redirect_to root_url and return unless @user.activated?
-   #@microposts = @user.microposts.paginate(page: params[:page])
-      
+    if admin_user == true
+      @user = User.find(current_user.id)
+    else
+      @user = User.find(params[:id])
+    end
+
    if params[:first_day] == nil
       # params[:first_day]が存在しない(つまりデフォルト時) # ▼月初(今月の1日, 00:00:00)を取得します
       @first_day = Date.new(Date.today.year, Date.today.month)
@@ -112,7 +113,11 @@ include UsersHelper
   end
   
   def edit_basic_info
-  
+    if params[:id].nil?
+      @user  = User.find(current_user.id)
+    else
+      @user  = User.find(params[:id])
+    end
   end
   
   def update_basic_info

@@ -10,7 +10,7 @@ Rails.application.routes.draw do
   post   '/leaving_time_create', to: 'users#leaving_time'  
   
   get    '/edit_basic_info',   to: 'users#edit_basic_info'
-  patch  '/update_basic_info' , to: 'users#update_basic_info'
+  post  '/update_basic_info' , to: 'users#update_basic_info'
   
   post   '/attendance_update',   to: 'attendances#attendance_update'
 

@@ -216,8 +216,6 @@ input {
 }
 
 .checkbox {
-  margin-top: -10px;
-  margin-bottom: 10px;
   span {
     margin-left: 20px;
     font-weight: normal;
@@ -321,4 +319,8 @@ td {
 .attendance-table .edit-table {
   text-align: center;
   vertical-align: middle;
+}
+
+.btn{
+  margin-top: 10px;
 }
