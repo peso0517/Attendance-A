@@ -10,11 +10,9 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
   end
 
   def show
-    if admin_user == true
-      @user = User.find(current_user.id)
-    else
       @user = User.find(params[:id])
-    end
+      
+   if current_user.admin || current_user.id == @user.id  
 
    if params[:first_day] == nil
       # params[:first_day]が存在しない(つまりデフォルト時) # ▼月初(今月の1日, 00:00:00)を取得します
@@ -61,6 +59,11 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
     
     #曜日表示用に使用する
     @youbi = %w(日 月 火 水 木 金 土)
+    
+  else 
+    flash[:warning] = "他ユーザーの閲覧をすることはできません！"
+    redirect_to current_user
+  end
   end
   
   def attendance_time
