@@ -61,7 +61,7 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
     @youbi = %w(日 月 火 水 木 金 土)
     
   else 
-    flash[:warning] = "他ユーザーの閲覧をすることはできません！"
+    flash[:warning] = "他ユーザーの情報を閲覧することができません！"
     redirect_to current_user
   end
   end
