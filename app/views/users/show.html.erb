@@ -12,9 +12,9 @@
       <%= link_to "▶️︎", user_path(first_day: @first_day.next_month) %>
      </td>
      
-     <td>指定勤務時間:<%= @user.specified_work_time.to_s(:time) if @user.specified_work_time.present? %></td>
+     <td>指定勤務時間:<%= basic_info_times(@user.specified_work_time) if @user.specified_work_time.present? %></td>
      
-     <td colspan="3">基本時間:<%= @user.basic_work_time.to_s(:time) if @user.basic_work_time.present? %></td>
+     <td colspan="3">基本時間:<%= basic_info_times(@user.basic_work_time) if @user.basic_work_time.present? %></td>
      
      <td>初日:<%= @first_day.month %>/<%= @first_day.day %></td>
     </tr>
@@ -116,14 +116,23 @@
      <tfoot>
       <tr>
        <!--１〜２列目：総合勤務時間＝基本時間＊出勤日数-->
-       <td colspan = "2"><%= total_attendance_times(@user.basic_work_time).to_d * @attendance_sum if @user.basic_work_time.present? %></td>
+       <td colspan = "2">
+        <!--総合勤務時間＞０-->
+        <%= total_attendance_times(@user.basic_work_time).to_d * @attendance_sum if @user.basic_work_time.present? %>
+        <!--総合勤務時間＝０-->
+        <%= 0 if @user.basic_work_time.blank? %>
+       </td>
        
        <!--３〜８列目：空欄-->
        <td colspan = "6"></td>
        
        <!--９列目：在社時間の合計-->
-       <td><%= ((@total_time.to_d/ 60)/ 60).truncate(2) if @total_time.present? %></td>
-       
+       <td>
+        <!--在社時間＞０ -->
+        <%= ((@total_time.to_d/ 60)/ 60).truncate(2) if @total_time.present? %>
+        <!--在社時間＝０ -->
+        <%= 0.0 if @total_time.blank? %>
+       </td>
        <!--１０列目：空欄-->
        <td></td>
        

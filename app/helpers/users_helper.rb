@@ -17,6 +17,10 @@ module UsersHelper
   def total_attendance_times(t)
     format("%.2f", ((t.hour * 60.0) + t.min)/60) if t.present?
   end
+  
+  def basic_info_times(t)
+    format("%.2f", ((t.hour * 60.0) + t.min)/60) if t.present?
+  end
 
   # 引数で与えられたユーザーのGravatar画像を返す
   def gravatar_for(user, size: 80)

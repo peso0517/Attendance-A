@@ -127,7 +127,7 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
       @user = User.find(params[:id])
     if @user.update_attributes(users_basic_params)
       # 更新に成功した場合を扱う。
-      flash[:success] = "基本情報を修正しました"
+      flash[:success] = "基本情報を修正しました！！"
       redirect_to @user
     else
       render 'edit'
@@ -136,7 +136,7 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
 
   def destroy
     User.find(params[:id]).destroy
-    flash[:success] = "User deleted"
+    flash[:success] = "ユーザーを削除しました！！"
     redirect_to users_url
   end
   

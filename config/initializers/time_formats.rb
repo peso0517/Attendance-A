@@ -3,7 +3,7 @@
 # to_s の入れ忘れに注意
 
 # 例：8.00（時間としては８時）
-Time::DATE_FORMATS[:time] = "%-H.%M"
+Time::DATE_FORMATS[:time] = "%-H:%M"
 
 # 例：01/01（１月１日）
 Date::DATE_FORMATS[:date] = "%m/%d"
