@@ -1,13 +1,8 @@
 <header class="navbar navbar-fixed-top navbar-inverse">
   <div class="container">
    
-   <% if !logged_in? %>
-    <%= link_to "勤怠管理システム", root_path, id: "logo" %>
-   <% end %>
-   <% if logged_in? %>
-    <%= link_to "勤怠管理システム",current_user , id: "logo" %>
-   <% end %>
-   
+    <%= link_to "勤怠管理システム", "https://attendance-sy-system.herokuapp.com", id: "logo" %>
+
     <nav>
       <ul class="nav navbar-nav navbar-right">
         <% if !logged_in? %>

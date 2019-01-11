@@ -158,7 +158,8 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
   private
     def user_params
       params.require(:user).permit(:name, :email, :password,
-                                   :password_confirmation,:affiliation)
+                                   :password_confirmation,:affiliation,
+                                   :specified_work_time,:basic_work_time)
     end
     
     def users_basic_params
