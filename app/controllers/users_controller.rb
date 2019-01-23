@@ -139,21 +139,10 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
     flash[:success] = "ユーザーを削除しました！！"
     redirect_to users_url
   end
-  
-  def following
-    @title = "Following"
-    @user  = User.find(params[:id])
-    @users = @user.following.paginate(page: params[:page])
-    render 'show_follow'
-  end
 
-  def followers
-    @title = "Followers"
-    @user  = User.find(params[:id])
-    @users = @user.followers.paginate(page: params[:page])
-    render 'show_follow'
+  #=>残業申請ボタン（モーダル表示）
+  def overtime_plan_modal
   end
-
 
   private
     def user_params
@@ -166,6 +155,9 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
       params.require(:user).permit(:specified_work_time, :basic_work_time)
     end
     
+    def overtime_plan_params
+      params.require(:user).permit(:overtime_plan, :business_process)
+    end
                 
     # beforeアクション
 
