@@ -4,6 +4,7 @@ before_action :correct_user,   only: [:edit, :update]
 before_action :admin_user,     only: [:destroy, :edit_basic_info]
  
  include UsersHelper
+ require 'csv'
   
   def index
     @users = User.paginate(page: params[:page])
@@ -91,9 +92,6 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
   def create
     @user = User.new(user_params)
     if @user.save
-       #@user.send_activation_email
-       #flash[:info] = "Please check your email to activate your account."
-       #redirect_to root_url
        log_in @user
        flash[:success]="ようこそ"
        redirect_to @user
@@ -143,16 +141,31 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
   #=>残業申請ボタン（モーダル表示）
   def overtime_plan_modal
   end
+  
+  def csv_output
+    @user = User.find(params[:id])
+    date = params[:first_day].to_datetime
+    output_first_day = date.beginning_of_month
+    output_last_day = output_first_day.end_of_month
+    @youbi = %w(日 月 火 水 木 金 土)
+    
+    @attendances = @user.attendances.where(day: output_first_day..output_last_day).order('day')
+    respond_to do |format|
+      format.csv do
+        send_data render_to_string, filename: "#{@user.name}.csv", type: :csv
+      end
+    end
+  end
 
   private
     def user_params
-      params.require(:user).permit(:name, :email, :password,
+      params.require(:user).permit(:name,:user_card_id ,:employee_number ,:password,
                                    :password_confirmation,:affiliation,
-                                   :specified_work_time,:basic_work_time)
+                                   :specified_work_time,:specified_end_time ,:basic_work_time)
     end
     
     def users_basic_params
-      params.require(:user).permit(:specified_work_time, :basic_work_time)
+      params.require(:user).permit(:specified_work_time,:specified_end_time , :basic_work_time)
     end
     
     def overtime_plan_params

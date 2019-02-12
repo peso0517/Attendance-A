@@ -2,7 +2,7 @@ Rails.application.routes.draw do
   root   'static_pages#home'
   
   get    '/signup',  to: 'users#new'
-  post   '/new_user',  to: 'users#new'
+  get   '/new_user',  to: 'users#new'
   get    '/login',   to: 'sessions#new'
   post   '/login',   to: 'sessions#create'
   delete '/logout',  to: 'sessions#destroy'
@@ -15,7 +15,7 @@ Rails.application.routes.draw do
   
   post   '/attendance_update',   to: 'attendances#attendance_update'
   
-  post   '/overtime_plan_form',   to: 'users#overtime_plan_form'
+  get  '/csv_output', to: 'users#csv_output'
 
   resources :users do
   member do

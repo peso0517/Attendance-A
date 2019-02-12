@@ -7,8 +7,8 @@
 #   Character.create(name: 'Luke', movie: movies.first)
 #   Character.create(name: 'Luke', movie: movies.first)
 User.create!(name:  "管理者",
-             email: "admin@admin.com",
              affiliation: "管理者",
+             employee_number: "admin",
              password:              "aiueok",
              password_confirmation: "aiueok",
              admin: true,
@@ -16,7 +16,6 @@ User.create!(name:  "管理者",
              activated_at: Time.zone.now)
 
 User.create!(name:  "上長",
-             email: "superior@superior.com",
              affiliation: "上長",
              password:              "kakikukeko",
              password_confirmation: "kakikukeko",
@@ -30,7 +29,6 @@ User.create!(name:  "上長",
              activated_at: Time.zone.now)
              
 User.create!(name:  "一般ユーザー",
-             email: "rails@railstutorial.org",
              affiliation: "サンプル一般",
              password: "foobar",
              password_confirmation: "foobar",

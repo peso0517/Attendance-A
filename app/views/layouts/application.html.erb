@@ -4,6 +4,7 @@
     <title><%= full_title(yield(:title)) %></title>
     <%= render 'layouts/rails_default' %>
     <%= render 'layouts/shim' %>
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
   </head>
   <body>
     <%= render 'layouts/header' %>
@@ -13,6 +14,34 @@
       <% end %>
       <%= yield %>
       <%= debug(params) if Rails.env.development? %>
+      
+                                                  
+<ul id="accordion_menu">
+  <li>
+    <a data-toggle="collapse" href="#menu01" aria-controls="#menu01" aria-expanded="false">リンクメニュー１</a>
+  </li>
+  <ul id="menu01" class="collapse" data-parent="#accordion_menu">
+    <li><a href="#">リンクサブメニュー1-1</a></li>
+    <li><a href="#">リンクサブメニュー1-2</a></li>
+    <li><a href="#">リンクサブメニュー1-3</a></li>
+  </ul>
+  <li>
+    <a data-toggle="collapse" href="#menu02" aria-controls="#menu02" aria-expanded="false">リンクメニュー２</a>
+  </li>
+  <ul id="menu02" class="collapse" data-parent="#accordion_menu">
+    <li><a href="#">リンクサブメニュー2-1</a></li>
+    <li><a href="#">リンクサブメニュー2-2</a></li>
+    <li><a href="#">リンクサブメニュー2-3</a></li>
+  </ul>
+  <li>
+    <a data-toggle="collapse" href="#menu03" aria-controls="#menu03" aria-expanded="false">リンクメニュー３</a>
+  </li>
+  <ul id="menu03" class="collapse" data-parent="#accordion_menu">
+    <li><a href="#">リンクサブメニュー3-1</a></li>
+    <li><a href="#">リンクサブメニュー3-2</a></li>
+    <li><a href="#">リンクサブメニュー3-3</a></li>
+  </ul>
+</ul>
     </div>
   </body>
 </html>

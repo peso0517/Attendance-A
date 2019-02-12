@@ -12,7 +12,10 @@
       <%= link_to "▶️︎", user_path(first_day: @first_day.next_month) %>
      </td>
      
-     <td>指定勤務時間:<%= basic_info_times(@user.specified_work_time) if @user.specified_work_time.present? %></td>
+     <td>
+      指定勤務開始時間:<%= basic_info_times(@user.specified_work_time) if @user.specified_work_time.present? %><br>
+      指定勤務終了時間:<%= basic_info_times(@user.specified_end_time) if @user.specified_end_time.present? %>
+     </td>
      
      <td colspan="3">基本時間:<%= basic_info_times(@user.basic_work_time) if @user.basic_work_time.present? %></td>
      
@@ -22,18 +25,18 @@
     <tr>
      <td>所属:<%= @user.affiliation %></td>
      <td>氏名:<%= @user.name %></td>
-     <td>コード</td>
-     <td></td>
+     <td>社員番号:<%= @user.employee_number %></td>
+     <td>カードID:<%= @user.user_card_id %></td>
      <td>出勤日数:<%= @attendance_sum %></td>
      <td>締め:<%= @last_day.month %>/<%= @last_day.day %></td>
     </tr>
    </head>
   </table>
  <!--中断-->
-  <br><%= link_to "勤怠を編集", edit_attendance_path(params:{id: @user.id, first_day: @first_day}), class: "btn btn-primary" %></br>
+   <%= link_to "勤怠を編集", edit_attendance_path(params:{id: @user.id, first_day: @first_day}), class: "btn btn-primary" %>
+   <%= link_to "CSV出力", csv_output_path(params:{id: @user.id, first_day: @first_day, format: :csv}), class: "btn btn-primary" %>
  <!--ここから下段の題目　-->
   <br>
-  
   
   <!--勤怠情報表示テーブル-->
    <table class = "table attendance-table table-striped table-bordered table-hover">
@@ -81,11 +84,13 @@
    <!--この列をeachで繰り返し表示している-->
     <% @days.each do |d| %>
     
-       <!--1列目：残業申請-->
-      <div id="user-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"> 
-       <td><%= link_to "残業申請", new_user_path, remote: true %></td>
-      </div>
-      
+     <!--1列目：残業申請-->
+      <td>
+       <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#overtime-modal" data-date="<%= d.day.month %>/<%= d.day.day %>" data-week ="<%= @youbi[d.day.wday] %>">
+        残業申請
+       </button>
+       <%= render 'users/overtime_plan_modal' %>
+      </td> <!-- このボタン押下後、以下のモーダルが開く　-->
        <!--２列目：日付-->
        <td><%= d.day.month %>/<%= d.day.day %></td>
        
@@ -107,7 +112,7 @@
        <td><%= d.leaving_time.hour if d.leaving_time.present? %></td>
        <td><%= d.leaving_time.min if d.leaving_time.present? %></td>
        
-       <!--９列目：退社時間表示（データが存在する場合）-->
+       <!--９列目：退社時間表示（データが存在する���合）-->
        <td>
         <% if d.day == Date.current && d.attendance_time.present? && d.leaving_time.nil? %>
           <%= button_to "退社",leaving_time_create_path(@user,params:{id: @user.id}),{class: "btn btn-default"}%>
