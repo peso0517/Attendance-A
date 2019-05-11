@@ -91,10 +91,35 @@ class AttendancesController < ApplicationController
     redirect_to user_url(@user, params:{ id: @user.id, first_day: params[:first_day]})
   end
   
+  def one_overtime_apply
+    @user = User.find(params[:id])
+    @one_overtime_apply = @user.attendances.find_by(day: params[:day])
+    #残業予定時間
+    @overtime_apply = params[:overtime_plan].in_time_zone
+    if  params[:overtime_plan].blank? || params[:business_process].blank? || params[:authority_user_id].blank?
+     flash[:danger] = "未入力項目がありました。再度申請してください。"
+    elsif params[:check] == "0" && ((@overtime_apply.hour + @overtime_apply.min)) - (@user.specified_end_time.hour + @user.specified_end_time.min) < 0
+     flash[:danger] = "不正な時間入力がありました。再度申請してください。"
+    else
+     @one_overtime_apply.update_attributes(overtime_plan: params[:overtime_plan],
+                                           business_process: params[:business_process],
+                                           check: params[:check],
+                                           apply_state: 2,
+                                           authority_user_id: params[:authority_user_id])
+     flash[:info] = "残業申請しました！"
+    end
+   redirect_to @user
+  end
+  
+  def one_overtime_approval
+    
+  end
+  
  private
   
   def attendances_params
    params.permit(attendances: [:attendance_time, :leaving_time])[:attendances]
   end
+ 
   
 end

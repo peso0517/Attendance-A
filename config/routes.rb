@@ -8,12 +8,13 @@ Rails.application.routes.draw do
   delete '/logout',  to: 'sessions#destroy'
   
   post   '/attendance_time_create', to: 'users#attendance_time'
-  post   '/leaving_time_create', to: 'users#leaving_time'  
-  
+  post   '/leaving_time_create', to: 'users#leaving_time'
   get    '/edit_basic_info',   to: 'users#edit_basic_info'
   post   '/update_basic_info' , to: 'users#update_basic_info'
   
   post   '/attendance_update',   to: 'attendances#attendance_update'
+  patch  '/one_overtime_apply',  to: 'attendances#one_overtime_apply'
+  patch  '/one_overtime_approval_modal',  to: 'attendances#one_overtime_approval_modal'
   
   get  '/csv_output', to: 'users#csv_output'
 

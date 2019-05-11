@@ -1,0 +1,53 @@
+<!--モーダル表示残業申請-->
+<div class="modal fade" id ="overtime-modal" tabindex="-1">
+ <div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+			 <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
+				<h4 class="modal-title">【残業申請】</h4>
+			</div>
+			<div class="modal-body">
+			 <table class = "table attendance-table table-striped table-bordered">
+			  <%= form_for(@user, url: one_overtime_apply_path(params: {id: @user.id})) do |f| %>
+			  <%= fields_for @one_overtime_apply do |tf| %>
+     <tr>
+      <th>日付</th>
+      <th>曜日</th>
+      <th>終了予定時間</th>
+      <th>翌日</th>
+      <th>業務処理内容</th>
+      <th>指示者確認印</th>
+     </tr>
+     <tr> <!--日付登録用-->
+      <%= tf.hidden_field :day, id: "modal-hidden_date" %>
+      <!--1行目：日付（日）-->
+      <td id = "modal-date"></td>
+      <!--2行目：日付（曜日）-->      
+      <td id = "modal-week"></td>
+      <!--3行目：残業申請時間-->
+      <td>
+       <%= tf.time_field :overtime_plan, class: 'form-control' %>
+      </td>
+　　　<!--4行目：翌日チェックボックス-->
+      <td>
+       <%= tf.check_box :check %> 
+      </td>
+      <!--5行目：業務処理内容-->
+      <td>
+       <%= tf.text_field :business_process, class: 'form-control' %>
+      </td>
+      <!--6行目：指示者-->
+      <td>
+       <%= tf.collection_select :authority_user_id, @superior_user,:id, :name, :include_blank => true %>
+      </td>
+     </tr>
+    </table>
+			</div>
+			<div class="modal-footer">
+			 <%= f.submit "登録", class: "btn btn-primary" %>
+			</div>
+			<% end %>
+			<% end %>
+		</div>
+	</div>
+</div>

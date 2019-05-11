@@ -1,0 +1,8 @@
+<!--モーダル表示残業承認-->
+<div id="inline-popups">
+ <% if @overtime_to_sp.blank? %>
+  <a>【残業申請のお知らせはありません】</a>
+ <% else %>
+  <a>【残業申請のお知らせ】</a>：<%= "#{@overtime_to_sp.count}件の通知があります。" %><br>
+ <% end %>
+</div>

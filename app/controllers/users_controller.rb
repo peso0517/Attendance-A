@@ -11,62 +11,54 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
   end
 
   def show
-      @user = User.find(params[:id])
-      
-   if current_user.admin || current_user.id == @user.id  
-
+   #ユーザー情報を取得
+   @user = User.find(params[:id])
+   if current_user.admin || current_user.id == @user.id 
+   #上長ユーザー情報を取得
+   @superior_user = User.where(superior: true)  
+   #上長に対する残業申請の有無
+   @overtime_to_sp = Attendance.where(authority_user_id: @user.id)
+   
+   
    if params[:first_day] == nil
       # params[:first_day]が存在しない(つまりデフォルト時) # ▼月初(今月の1日, 00:00:00)を取得します
       @first_day = Date.new(Date.today.year, Date.today.month)
     else
-      # ▼params[:piyo]が存在する(つまり切り替えボタン押下時)
-      #  paramsの中身は"文字列"で送られてくるので注意
-      #@first_day = Date.parse(params[:first_day])
-      #  もしくはto_datetimeメソッドとかで型を変える
       @first_day = params[:first_day].to_date
    end
-      @last_day = @first_day.end_of_month
-      
-      # 今月の初日から最終日の期間分を取得 
-      (@first_day..@last_day).each do |days|
-        
-      # ない日付はインスタンスを生成して保存する
-       if not @user.attendances.any? { |obj| obj.day == days }
-        dates = Attendance.new(user_id: @user.id, day: days)
-        dates.save
-       end
-      end 
-    # 当月を昇順で取得し@daysへ代入
-    @days = @user.attendances.where('day >= ? and day <= ?', @first_day, @last_day).order('day')
-    #在社時間表示  
-    # @days.each do |d|
-    # if d.attendance_time.present? && d.leaving_time.present?
-    #     @working_time = (d.leaving_time - d.attendance_time)/3600
-    # end
-    # end
-    #在社時間表示
-    i = 0
-    @days.each do |d|
+   @last_day = @first_day.end_of_month
+   #曜日表示用に使用する
+   @youbi = %w(日 月 火 水 木 金 土)
+          
+   # 今月の初日から最終日の期間分を取得 
+   (@first_day..@last_day).each do |days|
+   # ない日付はインスタンスを生成して保存する
+     if not @user.attendances.any? { |obj| obj.day == days }
+      dates = Attendance.new(user_id: @user.id, day: days)
+      dates.save
+     end
+   end 
+   # 当月を昇順で取得し@daysへ代入
+   @days = @user.attendances.where('day >= ? and day <= ?', @first_day, @last_day).order('day')
+   #出勤日数表示
+   @attendance_sum = @days.where.not(attendance_time: nil, leaving_time: nil).count
+   #在社時間表示
+   i = 0
+   @days.each do |d|
     if d.attendance_time.present? && d.leaving_time.present?
-        second = 0
-        second = times(d.attendance_time,d.leaving_time)
-        @total_time = @total_time.to_i + second.to_i
+     second = 0
+      second = times(d.attendance_time,d.leaving_time)
+       @total_time = @total_time.to_i + second.to_i
         i = i + 1
-      end
     end
-    
-    #出勤日数表示
-    @attendance_sum = @days.where.not(attendance_time: nil, leaving_time: nil).count
-    
-    #曜日表示用に使用する
-    @youbi = %w(日 月 火 水 木 金 土)
-    
-  else 
+   end
+   else 
     flash[:warning] = "他ユーザーの情報を閲覧することができません！"
     redirect_to current_user
-  end
+   end
   end
   
+  #出社時間
   def attendance_time
     @user = User.find(params[:id])
     @attendance_time = @user.attendances.find_by(day: Date.current)
@@ -76,6 +68,7 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
     redirect_to @user
   end
   
+  #退社時間
   def leaving_time
     @user = User.find(params[:id])
     @leaving_time = @user.attendances.find_by(day: Date.current)
@@ -137,10 +130,6 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
     flash[:success] = "ユーザーを削除しました！！"
     redirect_to users_url
   end
-
-  #=>残業申請ボタン（モーダル表示）
-  def overtime_plan_modal
-  end
   
   def csv_output
     @user = User.find(params[:id])
@@ -166,10 +155,6 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
     
     def users_basic_params
       params.require(:user).permit(:specified_work_time,:specified_end_time , :basic_work_time)
-    end
-    
-    def overtime_plan_params
-      params.require(:user).permit(:overtime_plan, :business_process)
     end
                 
     # beforeアクション
