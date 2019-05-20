@@ -6,7 +6,8 @@
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
 #   Character.create(name: 'Luke', movie: movies.first)
-User.create!(name:  "管理者",
+User.create!(id: 1,
+             name:  "管理者",
              affiliation: "管理者",
              employee_number: "admin",
              password:              "aiueok",
@@ -15,7 +16,8 @@ User.create!(name:  "管理者",
              activated: true,
              activated_at: Time.zone.now)
 
-User.create!(name:  "上長A",
+User.create!(id: 2,
+             name:  "上長A",
              affiliation: "上長",
              password: "foobar",
              password_confirmation: "foobar",
@@ -28,7 +30,8 @@ User.create!(name:  "上長A",
              activated: true,
              activated_at: Time.zone.now)
              
-User.create!(name:  "上長B",
+User.create!(id: 3,
+             name:  "上長B",
              affiliation: "上長",
              password: "foobar",
              password_confirmation: "foobar",
@@ -41,7 +44,8 @@ User.create!(name:  "上長B",
              activated: true,
              activated_at: Time.zone.now)
              
-User.create!(name:  "一般ユーザーA",
+User.create!(id: 4,
+             name:  "一般ユーザーA",
              affiliation: "サンプル一般",
              password: "foobar",
              password_confirmation: "foobar",
@@ -53,7 +57,8 @@ User.create!(name:  "一般ユーザーA",
              activated: true,
              activated_at: Time.zone.now)
              
-User.create!(name:  "一般ユーザーB",
+User.create!(id: 5,
+             name:  "一般ユーザーB",
              affiliation: "サンプル一般",
              password: "foobar",
              password_confirmation: "foobar",

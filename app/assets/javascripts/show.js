@@ -1,11 +1,12 @@
-  $(document).ready(function() {
-   $('#overtime-modal').on('show.bs.modal', function (event) {
+
+  jQuery(document).ready(function() {
+   jQuery('#overtime-modal').on('show.bs.modal', function (event) {
 	
-    var button = $(event.relatedTarget);
+    var button = jQuery(event.relatedTarget);
 	var date = button.data('date');
 	var week = button.data('week');
     var hidden_date = button.data('hidden_date')
-	var modal = $(this);
+	var modal = jQuery(this);
 	modal.find('#modal-date').text(date);
 	modal.find('#modal-week').text(week);
 	modal.find('#modal-hidden_date').val(hidden_date);

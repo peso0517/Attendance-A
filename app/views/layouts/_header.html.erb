@@ -1,3 +1,4 @@
+<% if current_user?(@user) %>
 <header class="navbar navbar-fixed-top navbar-inverse">
   <div class="container">
    
@@ -40,7 +41,5 @@
       </ul>
     </nav>
   </div>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-    <script>$('.dropdown-toggle').dropdown()</script>
 </header>
+<% end %>

@@ -13,13 +13,14 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
   def show
    #ユーザー情報を取得
    @user = User.find(params[:id])
-   if current_user.admin || current_user.id == @user.id 
+  if current_user.admin || current_user.superior == true || current_user.id == @user.id 
    #上長ユーザー情報を取得
-   @superior_user = User.where(superior: true)  
+   @superior_user = User.where(superior: true).where.not(id: current_user.id)  
    #上長に対する残業申請の有無
-   @overtime_to_sp = Attendance.where(authority_user_id: @user.id)
-   
-   
+   @overtime_to_sp = Attendance.where(authority_user_id: @user.id, apply_state: 2)
+   @overtime_apply = @overtime_to_sp.includes(:user)
+   @overtime_applys = @overtime_apply.group_by{|i| i.user.id}
+
    if params[:first_day] == nil
       # params[:first_day]が存在しない(つまりデフォルト時) # ▼月初(今月の1日, 00:00:00)を取得します
       @first_day = Date.new(Date.today.year, Date.today.month)
@@ -52,6 +53,7 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
         i = i + 1
     end
    end
+   
    else 
     flash[:warning] = "他ユーザーの情報を閲覧することができません！"
     redirect_to current_user

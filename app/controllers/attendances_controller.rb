@@ -6,8 +6,11 @@ class AttendancesController < ApplicationController
   def edit
    @user = User.find(params[:id])
       
-   if current_user.admin || current_user.id == @user.id
-
+   if current_user.admin || current_user.superior == true || current_user.id == @user.id 
+   #上長ユーザー情報を取得
+   @superior_user = User.where(superior: true).where.not(id: current_user.id) 
+   
+   
    if params[:first_day] == nil
       # params[:first_day]が存在しない(つまりデフォルト時) # ▼月初(今月の1日, 00:00:00)を取得します
       @first_day = Date.new(Date.today.year, Date.today.month)
@@ -44,32 +47,33 @@ class AttendancesController < ApplicationController
     #曜日表示用に使用する
     @youbi = %w(日 月 火 水 木 金 土)
     
-   else 
+  else 
     flash[:warning] = "他ユーザーの情報を閲覧することができません！"
     redirect_to current_user
-   end
   end
-  
+  end
+ 
+  #勤怠変更申請
   def attendance_update
-      
-  @user = User.find_by(id: params[:id])
-    error_count = 0
-    error_message = ""
+    @user = User.find_by(id: params[:id])
     
-      attendances_params.each do |id, item|
-      attendance = Attendance.find(id)
-      
-      #出社時間と退社時間の両方の存在を確認
-      if item["attendance_time"].blank? && item["leaving_time"].blank?
-        
-      # 当日以降の編集はadminユーザのみ
+    error_count = 0
+    error_message = ''
+
+    attendances_edit_apply_params.each do |id, item|
+    attendance = Attendance.find(id)
+     #出社時間と退社時間の両方の存在を確認
+     if item["attendance_time"].blank? && item["leaving_time"].blank?
+      # 当日以降の編集は不可
       elsif attendance.day > Date.current
-        error_message = '明日以降の勤怠編集は出来ません。'
+        error_message = '明日以降の申請は出来ません。'
         error_count += 1
-      
       #出社時間 > 退社時間ではないか
-      elsif item["attendance_time"].to_s > item["leaving_time"].to_s
-        error_message = '出社時間より退社時間が早い項目がありました'
+      elsif item["attendance_time"].to_s > item["leaving_time"].to_s && item["edit_next_check"] == 0
+        error_message = '出社時間より退社時間が早い項目があります。'
+        error_count += 1
+    　elsif item["edit_authority_user_id"].blank?
+    　  error_message = '指示者を選択してください。'
         error_count += 1
       end
     end #eachの締め
@@ -77,12 +81,11 @@ class AttendancesController < ApplicationController
     if error_count > 0
       flash[:warning] = error_message
     else
-      attendances_params.each do |id, item|
+      attendances_edit_apply_params.each do |id, item|
         attendance = Attendance.find(id)
-        
         if item["attendance_time"].blank? && item["leaving_time"].blank?
-          
-        else
+          next
+        elsif 
           attendance.update_attributes(item)
           flash[:success] = '勤怠時間を更新しました。'
         end
@@ -91,6 +94,7 @@ class AttendancesController < ApplicationController
     redirect_to user_url(@user, params:{ id: @user.id, first_day: params[:first_day]})
   end
   
+  #１日分の残業申請
   def one_overtime_apply
     @user = User.find(params[:id])
     @one_overtime_apply = @user.attendances.find_by(day: params[:day])
@@ -110,16 +114,27 @@ class AttendancesController < ApplicationController
     end
    redirect_to @user
   end
-  
+  #残業承認
   def one_overtime_approval
-    
+      one_overtime_approval_params.each do |id, item|
+      attendance = Attendance.find(id)
+       if item[:change_flg] === "true"
+        attendance.update_attributes(item)
+        attendance.update_attributes(change_flg: "false")
+        flash[:info] = "変更しました！"
+       else
+       end
+      end
+      redirect_to current_user
   end
-  
+
  private
   
-  def attendances_params
-   params.permit(attendances: [:attendance_time, :leaving_time])[:attendances]
+  def attendances_edit_apply_params
+   params.permit(attendances: [:attendance_time, :leaving_time, :edit_next_check, :remarks, :edit_authority_user_id])[:attendances]
   end
- 
   
+  def one_overtime_approval_params
+   params.permit(attendances: [:apply_state,:change_flg])[:attendances]
+  end
 end

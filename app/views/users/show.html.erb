@@ -1,7 +1,6 @@
 <% provide(:title, "勤怠表示画面") %>
-
   <table class="table table-bordered">
-   <head>
+   <tbody>
     <tr>
      <!--#params[:first_day]に前月or翌月の情報を入れてControllerへ渡してあげます 
       #▼前月の情報を渡す  --->
@@ -30,32 +29,35 @@
      <td>出勤日数:<%= @attendance_sum %></td>
      <td>締め:<%= @last_day.month %>/<%= @last_day.day %></td>
     </tr>
-   </head>
+   </tbody>
   </table>
- <!--中断-->
+ <!--上長のみ表示-->
    <% if @user.superior === true %>
     <%= link_to "【所属長承認申請のお知らせ】", "#" %><br>
     <%= link_to "【勤怠変更申請のお知らせ】", "#" %><br>
     <%= render 'users/one_overtime_approval_modal' %>
    <% end %>
-   <%= link_to "勤怠を編集", edit_attendance_path(params:{id: @user.id, first_day: @first_day}), class: "btn btn-primary" %>
-   <%= link_to "CSV出力", csv_output_path(params:{id: @user.id, first_day: @first_day, format: :csv}), class: "btn btn-primary" %>
- <!--ここから下段の題目　-->
+   <% if @user === current_user %>
+    <%= link_to "勤怠を編集", edit_attendance_path(params:{id: @user.id, first_day: @first_day}), class: "btn btn-primary" %>
+    <%= link_to "CSV出力", csv_output_path(params:{id: @user.id, first_day: @first_day, format: :csv}), class: "btn btn-primary" %>
+   <% end %>
+  <!--ここから下段の題目　-->
   <br>
-  
   <!--勤怠情報表示テーブル-->
-   <table class = "table attendance-table table-striped table-bordered table-hover">
+  <div class="table-responsive">
+   <table class = "table table-striped table-bordered table-hover">
     <!--勤怠情報表示ヘッダー-->
     <thead>
       <!--１列目-->
      <tr>
+     <% if current_user.id == @user.id %>
       <th rowspan = "4">残業申請</th>
+     <% end %>
       <th rowspan = "4">日付</th>
       <th rowspan = "4">曜日</th>
       <th colspan = "8">【実績】</th>
       <th colspan = "5">【所定外勤務】</th>
      </tr>
-    
      <tr>
         <!--rowspan:縦結合、colspan：横結合-->
       <th colspan = "3">出社</th>
@@ -67,7 +69,6 @@
       <th rowspan = "2">業務処理内容</th>
       <th rowspan = "2">指示者</th>
      </tr>
-    
       <!--２列目-->
      <tr>
       <th>時</th>
@@ -78,7 +79,6 @@
       <th></th>
       <th>時</th>
       <th>分</th>
-      
      </tr>
     </thead>
    </br>
@@ -87,14 +87,15 @@
     <tr class = "days">
    <!--この列をeachで繰り返し表示している-->
     <% @days.each do |d| %>
-    
      <!--1列目：残業申請-->
+      <% if current_user.id == @user.id %>
       <td>
        <button type="button" value="<%= d.day %>" class="btn btn-primary" data-toggle="modal" data-target="#overtime-modal" data-date="<%= d.day.month %>/<%= d.day.day %>" data-hidden_date="<%= d.day %>" data-week ="<%= @youbi[d.day.wday] %>">
         残業申請
        </button>
        <%= render 'users/one_overtime_plan_modal' %>
       </td>
+      <% end %>
        <!--２列目：日付-->
        <td><%= d.day.month %>/<%= d.day.day %></td>
        
@@ -107,7 +108,7 @@
        
        <!--６列目：自身の勤怠で出社時間と退社時間が空なら表示   -->
        <td>
-         <% if d.day == Date.current && d.attendance_time.nil? %>
+         <% if d.day == Date.current && d.attendance_time.nil? && current_user.id == @user.id %>
           <%= button_to "出社",attendance_time_create_path(@user,params:{id: @user.id}),{class: "btn btn-default"}%>
          <% end %>
        </td>
@@ -118,7 +119,7 @@
        
        <!--９列目：退社時間表示（データが存在する���合）-->
        <td>
-        <% if d.day == Date.current && d.attendance_time.present? && d.leaving_time.nil? %>
+        <% if d.day == Date.current && d.attendance_time.present? && d.leaving_time.nil? && current_user.id == @user.id %>
           <%= button_to "退社",leaving_time_create_path(@user,params:{id: @user.id}),{class: "btn btn-default"}%>
         <% end %>
        </td>
@@ -164,12 +165,11 @@
         <!--申請状況-->
         <% @applying_superior = @superior_user.find_by(id: d.authority_user_id) unless !d.authority_user_id.present? %>
         <% if d.apply_state === "applying" %>
-         <%= "申請中" %><br>
-         =><%= @applying_superior.name %>
+         <%= "残業申請中" %>=><%= @applying_superior.name %>
         <% elsif d.apply_state === "applied" %>
-         <%= "承認済" %>
+         <%= @applying_superior.name %>:<%= "残業承認" %><br>
         <% elsif d.apply_state === "denial" %>
-         <%= "申請却下" %>
+         <%= @applying_superior.name %>:<%= "残業申請却下" %><br>
         <% end %>
        </td>
       </tr>
@@ -180,7 +180,9 @@
      <tfoot>
       <tr>
        <!--１列目：空欄-->
+       <% if current_user.id == @user.id %>
        <td></td>
+       <% end %>
        <!--２〜３列目：総合勤務時間＝基本時間＊出勤日数-->
        <td colspan = "2">
         <!--総合勤務時間＞０-->
@@ -219,3 +221,4 @@
       </tr>
      </tfoot>
     </table>
+   </div>

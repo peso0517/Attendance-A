@@ -14,7 +14,7 @@ Rails.application.routes.draw do
   
   post   '/attendance_update',   to: 'attendances#attendance_update'
   patch  '/one_overtime_apply',  to: 'attendances#one_overtime_apply'
-  patch  '/one_overtime_approval_modal',  to: 'attendances#one_overtime_approval_modal'
+  patch  '/one_overtime_approval',  to: 'attendances#one_overtime_approval'
   
   get  '/csv_output', to: 'users#csv_output'
 

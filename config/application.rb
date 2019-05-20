@@ -16,9 +16,14 @@ module SampleApp
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
     
+    # i18n
+    config.i18n.default_locale = :ja
+    config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}').to_s]
+    config.i18n.default_locale = :ja
+    config.i18n.available_locales = [:ja, :en]
      # 認証トークンをremoteフォームに埋め込む
     config.action_view.embed_authenticity_token_in_remote_forms = true
     config.autoload_paths += Dir["#{config.root}/lib"]
-    config.i18n.default_locale = :ja
+
   end
 end

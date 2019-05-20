@@ -1,3 +1,5 @@
+
+
 @import "bootstrap-sprockets";
 @import "bootstrap";
 
@@ -173,20 +175,16 @@ aside {
   }
 }
 
-.user_avatars {
-  overflow: auto;
-  margin-top: 10px;
-  .gravatar {
-    margin: 1px 1px;
-  }
-  a {
-    padding: 0;
-  }
-}
-
-.users.follow {
-  padding: 0;
-}
+// .user_avatars {
+//   overflow: auto;
+//   margin-top: 10px;
+//   .gravatar {
+//     margin: 1px 1px;
+//   }
+//   a {
+//     padding: 0;
+//   }
+// }
 
 /* forms */
 
@@ -238,87 +236,33 @@ input {
     border-bottom: 1px solid $gray-lighter;
   }
 }
-
-/* microposts */
-
-.microposts {
-  list-style: none;
-  padding: 0;
-  li {
-    padding: 10px 0;
-    border-top: 1px solid #e8e8e8;
-  }
-  .user {
-    margin-top: 5em;
-    padding-top: 0;
-  }
-  .content {
-    display: block;
-    margin-left: 60px;
-    img {
-      display: block;
-      padding: 5px 0;
-    }
-  }
-  .timestamp {
-    color: $gray-light;
-    display: block;
-    margin-left: 60px;
-  }
-  .gravatar {
-    float: left;
-    margin-right: 10px;
-    margin-top: 5px;
-  }
-}
-
-aside {
-  textarea {
-    height: 100px;
-    margin-bottom: 5px;
-  }
-}
-
-span.picture {
-  margin-top: 10px;
-  input {
-    border: 0;
-  }
-}
 /*勤怠管理上部*/
-.tg {
-  width: 100%;
-  text-align: center;
-  border-collapse:collapse;border-spacing:0;
-}
-
-
 /*勤怠管理中部*/
 
 .table {
+  border: 1px solid #bbb;
+  padding: 2px 8px 0;
   text-align: center;
   vertical-align: middle;
 }
 
-th {
+/*勤怠管理上部*/
+/*勤怠管理中部*/
+
+.table > thead > tr > th {
+  border: 1px solid #bbb;
+  padding: 2px 8px 0;
   text-align: center;
   vertical-align: middle;
 }
 
-td {
-  text-align: center;
-  vertical-align: middle;
+.table-bordered > tbody > tr > td {
+    vertical-align: middle;
 }
-
 
 #fixed {
     width: 100%;
     table-layout: fixed;
-}
-
-.attendance-table .edit-table {
-  text-align: center;
-  vertical-align: middle;
 }
 
 .btn{
@@ -328,3 +272,14 @@ td {
 .modal-footer {
   text-align: center;
 }
+
+.white-popup {
+  position: relative;
+  background: #FFF;
+  padding: 20px;
+  width: auto;
+  max-width: 1000px;
+  margin: 20px auto;
+  text-align: center;
+}
+

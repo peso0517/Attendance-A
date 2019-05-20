@@ -1,8 +1,86 @@
 <!--モーダル表示残業承認-->
-<div id="inline-popups">
+<div id ="inline-popups">
  <% if @overtime_to_sp.blank? %>
-  <a>【残業申請のお知らせはありません】</a>
+  <div id= "hoge">【残業申請のお知らせはありません】</div>
  <% else %>
-  <a>【残業申請のお知らせ】</a>：<%= "#{@overtime_to_sp.count}件の通知があります。" %><br>
+  <a id= "hoge" href="#one-overtime-approval-modal">【残業申請のお知らせ】</a>：<%= "#{@overtime_to_sp.count}件の通知があります。" %><br>
  <% end %>
 </div>
+
+<div class ="white-popup mfp-with-anim mfp-hide" id = "one-overtime-approval-modal">
+ <%= form_with model: @user, url: one_overtime_approval_path, local: true do |f| %>
+ <% @overtime_applys.each do |user_id, attendances| %>
+  <% user = User.find(user_id) %>
+	 <h4 class="title-modal">【<%= user.name %>からの残業申請】</h4>
+   <table class = "table attendance-table table-striped table-bordered">
+    <thead>
+     <tr>
+      <th>日付</th>
+      <th>曜日</th>
+      <th>終了予定時間</th>
+      <th>指定勤務終了時間</th>
+      <th>時間外勤務時間</th>
+      <th>業務処理内容</th>
+      <th>申請状況</th>
+      <th>変更</th>
+      <th>勤怠を確認する</th>
+     </tr>
+    </thead>
+    <% attendances.each do |attendance| %>
+    <%= fields_for "attendances[]", attendance do |af| %>
+    <tbody>
+      <tr>
+      <!--1行目：日付（日）-->
+       <td><%= attendance.day.month %>/<%=attendance.day.day %></td>
+      <!--2行目：日付（曜日）-->      
+       <td><%= @youbi[attendance.day.wday] %></td>
+      <!--3行目：残業申請時間-->
+       <td><%= attendance.overtime_plan.to_s(:hour) %>:<%= attendance.overtime_plan.min %></td>
+　　　<!--4行目：勤務終了時間-->
+       <td>
+         <%= user.specified_end_time.to_s(:hour) %>:<%= user.specified_end_time.min %>
+       </td>
+      <!--5行目：時間外勤務時間-->
+       <td>
+        <% if attendance.check === 1 %>
+          <%= format("%.1f", (Time.new(attendance.day.year,attendance.day.month,attendance.day.day,attendance.overtime_plan.hour,attendance.overtime_plan.min) + 1.day - Time.new(attendance.day.year,attendance.day.month,attendance.day.day,user.specified_end_time.hour,user.specified_end_time.min))/3600) %>
+        <% else %> 
+          <%= format("%.1f", (Time.new(attendance.day.year,attendance.day.month,attendance.day.day,attendance.overtime_plan.hour,attendance.overtime_plan.min) - Time.new(attendance.day.year,attendance.day.month,attendance.day.day,user.specified_end_time.hour,user.specified_end_time.min))/3600) %>
+        <% end %>
+       </td>
+      <!--6行目：業務処理内容-->
+       <td>
+       <%= attendance.business_process %>
+       </td>
+      <!--7行目：申請状況-->
+
+         <td><%= af.select :apply_state, Attendance.localed_apply_state, {}, class: 'form-control'  %></td>
+
+      <!--8行目：変更するか否か-->
+              <td>
+       <%= af.check_box :change_flg, {}, true, false %>
+       </td>
+       <%#= f.collection_select :authority_user_id, @superior_user,:id, :name, :include_blank => true %>
+      <!--9行目：勤怠確認-->
+       <td><%= link_to '確認', user_path(id: user_id, first_day: attendance.day), class: "btn btn-primary", :target => "_blank" %></td>
+      </tr>
+     </tbody>
+     <% end %>
+    <% end %>		
+   </table>
+ <% end %>
+ <%= f.submit "登録", class: "btn btn-primary" %>
+ <% end %>
+</div>
+
+<script>
+ jQuery('#inline-popups').magnificPopup({
+    delegate: 'a'
+    // removalDelay: 500
+    // callbacks: {
+    //   beforeOpen: function() {
+    //      this.st.mainClass = this.st.el.attr('data-effect');
+    //   },
+    // },
+});
+</script>
