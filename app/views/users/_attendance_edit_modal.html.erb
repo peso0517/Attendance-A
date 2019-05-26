@@ -1,0 +1,107 @@
+<!--モーダル表示勤怠変更承認-->
+<div id ="inline-edit-popups">
+ <% if @attendance_change_to_sp.blank? %>
+  <div id= "aaa">【勤怠変更申請のお知らせはありません】</div>
+ <% else %>
+  <a id= "aaa" href="#attendance-edit-approval-modal">【勤怠変更申請のお知らせ】</a>：<%= "#{@attendance_change_to_sp.count}件の通知があります。" %></p>
+ <% end %>
+</div>
+
+<div class ="white-popup mfp-with-anim mfp-hide" id = "attendance-edit-approval-modal">
+ <%= form_with model: @user, url: attendance_edit_approval_path, local: true do |f| %>
+ <% @attendance_change_applys.each do |user_id, attendances| %>
+  <% user = User.find(user_id) %>
+	 <h4 class="title-modal">【<%= user.name %>からの勤怠変更申請】</h4>
+   <table class = "table attendance-table table-striped table-bordered">
+    <thead>
+     <!--１列目-->
+     <tr>
+      <th rowspan = "3">日付</th>
+      <th rowspan = "3">曜日</th>
+      <th colspan = "4">変更前</th>
+      <th colspan = "4">変更後</th>
+      <th rowspan = "3">備考</th>
+      <th rowspan = "3">指示者確認印</th>
+      <th rowspan = "3">変更</th>
+      <th rowspan = "3">勤怠を確認する</th>
+     </tr>
+     <!--2列目-->
+     <tr>
+      <th colspan = "2">出社</th>
+      <th colspan = "2">退社</th>
+      <th colspan = "2">出社</th>
+      <th colspan = "2">退社</th>
+     </tr>
+     <!--3列目-->
+     <tr>
+      <th>時</th>
+      <th>分</th>
+      <th>時</th>
+      <th>分</th>
+      <th>時</th>
+      <th>分</th>
+      <th>時</th>
+      <th>分</th>
+     </tr>
+    </thead>
+    <% attendances.each do |attendance| %>
+    <%= fields_for "attendances[]", attendance do |af| %>
+    <tbody>
+      <tr>
+      <!--1行目：日付（日）-->
+       <td><%= attendance.day.month %>/<%=attendance.day.day %></td>
+      <!--2行目：日付（曜日）-->      
+       <td><%= @youbi[attendance.day.wday] %></td>
+      <!--3行目-4行目：出社変更前----空の場合-->
+       <% if attendance.attendance_time.nil? %>
+        <td></td>
+        <td></td>
+       <% else %>
+        <td><%= attendance.attendance_time.to_s(:hour) %></td>
+        <td><%= attendance.attendance_time.to_s(:min) %></td>
+       <% end %>
+       <!--5行目-6行目：退社変更前----空の場合-->
+       <% if attendance.leaving_time.nil? %>
+        <td></td>
+        <td></td>
+       <% else %>
+        <td><%= attendance.leaving_time.to_s(:hour) %></td>
+        <td><%= attendance.leaving_time.to_s(:min) %></td>
+       <% end %>
+      <!--7行目：変更後出社時間（hour）-->
+       <td><%= attendance.edit_attendance_time.to_s(:hour) %></td>
+　　　<!--8行目：変更後出社時間（min）-->
+       <td><%= attendance.edit_attendance_time.to_s(:min) %></td>
+      <!--9行目：変更後退社時間（hour）-->
+       <td><%= attendance.edit_leaving_time.to_s(:hour) %></td>
+　　　<!--10行目：変更後退社時間（min）-->
+       <td><%= attendance.edit_leaving_time.to_s(:min) %></td>
+      <!--11行目：備考欄-->
+       <td><%= attendance.remarks %></td>
+      <!--12行目：申請状況-->
+       <td><%= af.select :attendance_change_state, Attendance.localed_attendance_change_state, {}, class: 'form-control'  %></td>
+      <!--13行目：変更するか否か-->
+       <td><%= af.check_box :change_flg, {}, true, false %></td>
+      <!--14行目：勤怠確認-->
+       <td><%= link_to '確認', user_path(id: user_id, first_day: @first_day), class: "btn btn-primary", :target => "_blank" %></td>
+      </tr>
+     </tbody>
+     <% end %>
+    <% end %>		
+   </table>
+ <% end %>
+ <%= f.submit "登録", class: "btn btn-primary" %>
+ <% end %>
+</div>
+
+<script>
+ jQuery('#inline-edit-popups').magnificPopup({
+    delegate: 'a'
+    // removalDelay: 500
+    // callbacks: {
+    //   beforeOpen: function() {
+    //      this.st.mainClass = this.st.el.attr('data-effect');
+    //   },
+    // },
+});
+</script>

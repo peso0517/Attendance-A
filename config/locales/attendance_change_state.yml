@@ -1,0 +1,7 @@
+ja:
+  attendance_change_state:
+    article:
+      nothing1: ''
+      applying2: '申請中'
+      applied3: '承認'
+      denial4: '申請却下'

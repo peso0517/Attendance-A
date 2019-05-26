@@ -1,6 +1,8 @@
 class AttendancesController < ApplicationController
    before_action :logged_in_user
    include UsersHelper
+   include AttendanceHelper
+
    
    
   def edit
@@ -31,13 +33,11 @@ class AttendancesController < ApplicationController
     # 当月を昇順で取得し@daysへ代入
     @days = @user.attendances.where('day >= ? and day <= ?', @first_day, @last_day).order('day')
     #在社時間表示
-    i = 0
     @days.each do |d|
     if d.attendance_time.present? && d.leaving_time.present?
         second = 0
         second = times(d.attendance_time,d.leaving_time)
         @total_time = @total_time.to_i + second.to_i
-        i = i + 1
     end
     end
     
@@ -56,42 +56,44 @@ class AttendancesController < ApplicationController
   #勤怠変更申請
   def attendance_update
     @user = User.find_by(id: params[:id])
-    
-    error_count = 0
-    error_message = ''
-
-    attendances_edit_apply_params.each do |id, item|
-    attendance = Attendance.find(id)
-     #出社時間と退社時間の両方の存在を確認
-     if item["attendance_time"].blank? && item["leaving_time"].blank?
-      # 当日以降の編集は不可
-      elsif attendance.day > Date.current
-        error_message = '明日以降の申請は出来ません。'
-        error_count += 1
-      #出社時間 > 退社時間ではないか
-      elsif item["attendance_time"].to_s > item["leaving_time"].to_s && item["edit_next_check"] == 0
-        error_message = '出社時間より退社時間が早い項目があります。'
-        error_count += 1
-    　elsif item["edit_authority_user_id"].blank?
-    　  error_message = '指示者を選択してください。'
-        error_count += 1
-      end
-    end #eachの締め
-    
-    if error_count > 0
-      flash[:warning] = error_message
+    if attendances_invalid?
+       attendances_edit_apply_params.each do |id, item|
+         attendance = Attendance.find(id)
+         attendance.update_attributes(item)
+         if item["edit_authority_user_id"].present?
+          attendance.update_attributes(attendance_change_state: "applying2")
+         end
+       end
+      flash[:success] = '勤怠時間を更新しました。'
+      redirect_to user_url(@user, params:{ id: @user.id, first_day: params[:first_day]})
     else
-      attendances_edit_apply_params.each do |id, item|
-        attendance = Attendance.find(id)
-        if item["attendance_time"].blank? && item["leaving_time"].blank?
-          next
-        elsif 
-          attendance.update_attributes(item)
-          flash[:success] = '勤怠時間を更新しました。'
-        end
-      end #eachの締め
+      flash[:warning] = '不正な入力があります。再度申請してください。'
+      redirect_to edit_attendance_url(@user, params:{ id: @user.id, first_day: params[:first_day]})
     end
-    redirect_to user_url(@user, params:{ id: @user.id, first_day: params[:first_day]})
+  end
+  
+  #勤怠変更承認
+  def attendance_edit_approval
+   attendance_edit_approval_params.each do |id, item|
+    attendance = Attendance.find(id)
+      if item[:change_flg] === "true"
+       if attendance.before_edit_attendance_time.blank? 
+          attendance.update_attributes(before_edit_attendance_time: attendance.edit_attendance_time)
+       end
+       if attendance.before_edit_leaving_time.blank?
+        attendance.update_attributes(before_edit_leaving_time: attendance.edit_leaving_time)
+       end
+       #申請された内容を更新する。
+       attendance.update_attributes(item)
+       attendance.update_attributes(change_flg: "false")
+       #承認されたら、出社時間と退社時間を更新する。
+       if attendance.attendance_change_state == "applied3"
+        attendance.update_attributes(attendance_time: attendance.edit_attendance_time,leaving_time: attendance.edit_leaving_time)
+       end
+        flash[:info] = "変更しました！"
+      end
+   end
+      redirect_to current_user
   end
   
   #１日分の残業申請
@@ -131,10 +133,14 @@ class AttendancesController < ApplicationController
  private
   
   def attendances_edit_apply_params
-   params.permit(attendances: [:attendance_time, :leaving_time, :edit_next_check, :remarks, :edit_authority_user_id])[:attendances]
+   params.permit(attendances: [:edit_attendance_time, :edit_leaving_time, :edit_next_check, :remarks, :edit_authority_user_id])[:attendances]
   end
   
   def one_overtime_approval_params
    params.permit(attendances: [:apply_state,:change_flg])[:attendances]
+  end
+  
+  def attendance_edit_approval_params
+   params.permit(attendances: [:attendance_change_state,:change_flg])[:attendances]
   end
 end

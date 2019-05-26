@@ -14,13 +14,21 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
    #ユーザー情報を取得
    @user = User.find(params[:id])
   if current_user.admin || current_user.superior == true || current_user.id == @user.id 
-   #上長ユーザー情報を取得
-   @superior_user = User.where(superior: true).where.not(id: current_user.id)  
+   #表示用上長ユーザー情報を取得
+   @superior_user = User.where(superior: true).where.not(id: current_user.id)
+   #セレクトボックス用上長ユーザー情報
+   @superior = User.where(superior: true)
    #上長に対する残業申請の有無
    @overtime_to_sp = Attendance.where(authority_user_id: @user.id, apply_state: 2)
    @overtime_apply = @overtime_to_sp.includes(:user)
    @overtime_applys = @overtime_apply.group_by{|i| i.user.id}
-
+   #上長に対する勤怠変更申請の有無
+   @attendance_change_to_sp = Attendance.where(edit_authority_user_id: @user.id, attendance_change_state: 2)
+   @attendance_change =  @attendance_change_to_sp.includes(:user)
+   #上長に対する勤怠変更申請の有無
+   @attendance_change_applys = @attendance_change.group_by{|i| i.user.id}
+   
+   
    if params[:first_day] == nil
       # params[:first_day]が存在しない(つまりデフォルト時) # ▼月初(今月の1日, 00:00:00)を取得します
       @first_day = Date.new(Date.today.year, Date.today.month)
@@ -44,16 +52,21 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
    #出勤日数表示
    @attendance_sum = @days.where.not(attendance_time: nil, leaving_time: nil).count
    #在社時間表示
-   i = 0
-   @days.each do |d|
-    if d.attendance_time.present? && d.leaving_time.present?
-     second = 0
-      second = times(d.attendance_time,d.leaving_time)
-       @total_time = @total_time.to_i + second.to_i
-        i = i + 1
-    end
+    second = 0
+    next_second = 0
+    @total_time = 0
+    @days.each do |d|
+     if d.attendance_time.present? && d.leaving_time.present?
+       if d.edit_next_check == 0
+        second = second + times(d.attendance_time,d.leaving_time)
+        @total_time = @total_time + second.to_i
+       end
+       if d.edit_next_check == 1
+        next_second = next_second + next_times(d.attendance_time,d.leaving_time)
+        @total_time = @total_time + next_second.to_i
+       end
+     end
    end
-   
    else 
     flash[:warning] = "他ユーザーの情報を閲覧することができません！"
     redirect_to current_user
@@ -64,8 +77,7 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
   def attendance_time
     @user = User.find(params[:id])
     @attendance_time = @user.attendances.find_by(day: Date.current)
-    @attendance_time.update_attributes(attendance_time: DateTime.new(DateTime.now.year,\
-    DateTime.now.month, DateTime.now.day,DateTime.now.hour,DateTime.now.min,0))
+    @attendance_time.update_attributes(attendance_time: current_time,edit_attendance_time: current_time)
     flash[:info] = "出社登録完了しました！！"
     redirect_to @user
   end
@@ -74,8 +86,7 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
   def leaving_time
     @user = User.find(params[:id])
     @leaving_time = @user.attendances.find_by(day: Date.current)
-    @leaving_time.update_attributes(leaving_time: DateTime.new(DateTime.now.year,\
-    DateTime.now.month, DateTime.now.day,DateTime.now.hour,DateTime.now.min,0))
+    @leaving_time.update_attributes(leaving_time: current_time,edit_leaving_time: current_time)
     flash[:info] = "退社登録完了しました！！"
     redirect_to @user
   end

@@ -15,7 +15,7 @@ Date::DATE_FORMATS[:day] = "%-m/%d"
 Date::DATE_FORMATS[:month] = "%Y年%-m月"
 
 Time::DATE_FORMATS[:hour] = "%H"
-Time::DATE_FORMATS[:minute] = "%M"
+Time::DATE_FORMATS[:min] = "%M"
 
 # 使わないかもしれない
 Time::DATE_FORMATS[:times] = "%Y年%m月%d日 %H時%M分%S秒"

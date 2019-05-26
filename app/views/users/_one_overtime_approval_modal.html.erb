@@ -1,9 +1,9 @@
 <!--モーダル表示残業承認-->
 <div id ="inline-popups">
  <% if @overtime_to_sp.blank? %>
-  <div id= "hoge">【残業申請のお知らせはありません】</div>
+  <div id= "ddd">【残業申請のお知らせはありません】</div>
  <% else %>
-  <a id= "hoge" href="#one-overtime-approval-modal">【残業申請のお知らせ】</a>：<%= "#{@overtime_to_sp.count}件の通知があります。" %><br>
+  <a id= "ddd" href="#one-overtime-approval-modal">【残業申請のお知らせ】</a>：<%= "#{@overtime_to_sp.count}件の通知があります。" %><br>
  <% end %>
 </div>
 
@@ -60,9 +60,8 @@
               <td>
        <%= af.check_box :change_flg, {}, true, false %>
        </td>
-       <%#= f.collection_select :authority_user_id, @superior_user,:id, :name, :include_blank => true %>
       <!--9行目：勤怠確認-->
-       <td><%= link_to '確認', user_path(id: user_id, first_day: attendance.day), class: "btn btn-primary", :target => "_blank" %></td>
+       <td><%= link_to '確認', user_path(id: user_id, first_day: @first_day), class: "btn btn-primary", :target => "_blank" %></td>
       </tr>
      </tbody>
      <% end %>

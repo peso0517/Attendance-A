@@ -29,6 +29,10 @@ ActiveRecord::Schema.define(version: 20190519140729) do
     t.integer "attendance_change_state", default: 1, null: false
     t.integer "edit_next_check", default: 0, null: false
     t.integer "edit_authority_user_id"
+    t.datetime "edit_attendance_time"
+    t.datetime "edit_leaving_time"
+    t.datetime "before_edit_attendance_time"
+    t.datetime "before_edit_leaving_time"
     t.index ["user_id"], name: "index_attendances_on_user_id"
   end
 

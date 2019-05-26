@@ -34,7 +34,7 @@
  <!--上長のみ表示-->
    <% if @user.superior === true %>
     <%= link_to "【所属長承認申請のお知らせ】", "#" %><br>
-    <%= link_to "【勤怠変更申請のお知らせ】", "#" %><br>
+    <%= render 'users/attendance_edit_modal' %>
     <%= render 'users/one_overtime_approval_modal' %>
    <% end %>
    <% if @user === current_user %>
@@ -59,6 +59,7 @@
       <th colspan = "5">【所定外勤務】</th>
      </tr>
      <tr>
+        <!--2列目-->
         <!--rowspan:縦結合、colspan：横結合-->
       <th colspan = "3">出社</th>
       <th colspan = "3">退社</th>
@@ -69,7 +70,7 @@
       <th rowspan = "2">業務処理内容</th>
       <th rowspan = "2">指示者</th>
      </tr>
-      <!--２列目-->
+      <!--3列目-->
      <tr>
       <th>時</th>
       <th>分</th>
@@ -126,7 +127,13 @@
        
         <!--１０列目：在社時間-->
        <td>
-        <%= working_times(d.attendance_time,d.leaving_time) if d.attendance_time.present? && d.leaving_time.present? %>
+        <% if d.attendance_time.present? && d.leaving_time.present? %>
+         <% if d.edit_next_check == 1 %>
+          <%= additional_working_times(d.attendance_time,d.leaving_time) %>
+         <% else %>
+          <%= working_times(d.attendance_time,d.leaving_time) %>
+         <% end %>
+        <% end %>
        </td>
        
        <!--１１列目：備考（空欄）-->
@@ -162,14 +169,23 @@
        </td>
        <!--１６列目：指示者（空欄）-->
        <td>
-        <!--申請状況-->
-        <% @applying_superior = @superior_user.find_by(id: d.authority_user_id) unless !d.authority_user_id.present? %>
+        <!--残業申請状況-->
+        <% @applying_superior = @superior.find_by(id: d.authority_user_id) unless d.authority_user_id.blank? %>
         <% if d.apply_state === "applying" %>
-         <%= "残業申請中" %>=><%= @applying_superior.name %>
+         <%= "残業申請中" %>=><%= @applying_superior.name %><br>
         <% elsif d.apply_state === "applied" %>
          <%= @applying_superior.name %>:<%= "残業承認" %><br>
         <% elsif d.apply_state === "denial" %>
          <%= @applying_superior.name %>:<%= "残業申請却下" %><br>
+        <% end %>
+        <!--勤怠変更申請状況-->
+        <% @edit_applying_superior = @superior.find_by(id: d.edit_authority_user_id) unless d.edit_authority_user_id.blank? %>
+        <% if d.attendance_change_state === "applying2" %>
+         <%= "勤怠変更申請中" %>=><%= @edit_applying_superior.name %><br>
+        <% elsif d.attendance_change_state === "applied3" %>
+         <%= @edit_applying_superior.name %>:<%= "勤怠変更承認" %><br>
+        <% elsif d.attendance_change_state === "denial4" %>
+         <%= @edit_applying_superior.name %>:<%= "勤怠変更否認" %><br>
         <% end %>
        </td>
       </tr>
@@ -197,7 +213,7 @@
        <!--９列目：在社時間の合計-->
        <td>
         <!--在社時間＞０ -->
-        <%= ((@total_time.to_d/ 60)/ 60).truncate(2) if @total_time.present? %>
+        <%= ((@total_time.to_i/ 60)/ 60).truncate(2) if @total_time.present? %>
         <!--在社時間＝０ -->
         <%= 0.0 if @total_time.blank? %>
        </td>
@@ -217,7 +233,10 @@
        <td></td>
        
        <!--１５列目：所属長承認-->
-       <td>所属長承認</td>
+       <td>
+        所属長承認<br>
+        
+       </td>
       </tr>
      </tfoot>
     </table>

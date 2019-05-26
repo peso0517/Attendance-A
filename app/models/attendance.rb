@@ -12,6 +12,12 @@ class Attendance < ApplicationRecord
         [I18n.t("apply_state.article.#{s}"), s]
       end
     end
+    def localed_attendance_change_state
+      attendance_change_states.keys.map do |s|
+        [I18n.t("attendance_change_state.article.#{s}"), s]
+      end
+    end
+    
   end
   
 end
