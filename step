@@ -1,0 +1,22 @@
+
+[1mFrom:[0m /home/ec2-user/environment/attendance-system/app/controllers/attendances_controller.rb @ line 123 AttendancesController#one_month_apply:
+
+    [1;34m119[0m: [32mdef[0m [1;34mone_month_apply[0m
+    [1;34m120[0m:  [32mif[0m params[[33m:one_month_authority_user_id[0m].blank?
+    [1;34m121[0m:     flash[[33m:danger[0m] = [31m[1;31m"[0m[31m1ヶ月分の勤怠申請を行う場合、所属長を選択してください。[1;31m"[0m[31m[0m
+    [1;34m122[0m:  [32melse[0m
+ => [1;34m123[0m:   binding.pry
+    [1;34m124[0m:     @user = [1;34;4mUser[0m.find_by([35mid[0m: params[[33m:one_month_applying_user_id[0m])
+    [1;34m125[0m:     @first_day = params[[33m:first_day[0m].to_date
+    [1;34m126[0m:     [1;34m# ない日付はインスタンスを生成して保存する[0m
+    [1;34m127[0m:      [32mif[0m [32mnot[0m [1;34;4mOneMonthAttendance[0m.any? { |obj| obj.one_month_apply_date == @first_day && obj.one_month_applying_user_id == @user.id}
+    [1;34m128[0m:        one_month_apply = [1;34;4mOneMonthAttendance[0m.create([35mone_month_applying_user_id[0m: @user.id, [35mone_month_apply_date[0m: @first_day)
+    [1;34m129[0m:      [32mend[0m
+    [1;34m130[0m:       @one_month_apply = [1;34;4mOneMonthAttendance[0m.find_by([35mone_month_applying_user_id[0m: @user.id,[35mone_month_apply_date[0m: @first_day)
+    [1;34m131[0m:       @one_month_apply.update_attributes([35mone_month_apply_state[0m: params[[33m:one_month_apply_state[0m],
+    [1;34m132[0m:                                          [35mone_month_authority_user_id[0m: params[[33m:one_month_authority_user_id[0m])
+    [1;34m133[0m:   flash[[33m:info[0m] = [31m[1;31m"[0m[31m#{@first_day.year}[0m[31m年#{@first_day.month}[0m[31m月分の勤怠申請しました！！[1;31m"[0m[31m[0m
+    [1;34m134[0m:  [32mend[0m
+    [1;34m135[0m:   redirect_to current_user
+    [1;34m136[0m: [32mend[0m
+

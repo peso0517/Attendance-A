@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190519140729) do
+ActiveRecord::Schema.define(version: 20190623142157) do
 
   create_table "attendances", force: :cascade do |t|
     t.datetime "attendance_time"
@@ -33,7 +33,15 @@ ActiveRecord::Schema.define(version: 20190519140729) do
     t.datetime "edit_leaving_time"
     t.datetime "before_edit_attendance_time"
     t.datetime "before_edit_leaving_time"
+    t.date "latest_approval_date"
     t.index ["user_id"], name: "index_attendances_on_user_id"
+  end
+
+  create_table "bases", force: :cascade do |t|
+    t.string "base_name"
+    t.string "base_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "microposts", force: :cascade do |t|
@@ -44,6 +52,16 @@ ActiveRecord::Schema.define(version: 20190519140729) do
     t.string "picture"
     t.index ["user_id", "created_at"], name: "index_microposts_on_user_id_and_created_at"
     t.index ["user_id"], name: "index_microposts_on_user_id"
+  end
+
+  create_table "one_month_attendances", force: :cascade do |t|
+    t.integer "one_month_apply_state"
+    t.date "one_month_apply_date"
+    t.integer "one_month_authority_user_id"
+    t.integer "one_month_applying_user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "approval_flg", default: false
   end
 
   create_table "relationships", force: :cascade do |t|

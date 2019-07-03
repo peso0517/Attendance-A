@@ -13,6 +13,9 @@ body {
   padding-top: 60px;
 }
 
+li {
+  list-style: none;
+}
 section {
   overflow: auto;
 }
@@ -27,6 +30,10 @@ textarea {
 
 .center h1 {
   margin-bottom: 10px;
+}
+
+a {
+text-decoration: none;
 }
 
 @mixin box_sizing {
@@ -190,13 +197,13 @@ aside {
 
 input, textarea, select, .uneditable-input {
   border: 1px solid #bbb;
-  width: 100%;
+  // width: 100%;
   @include box_sizing;
 }
 
-input {
-  height: auto !important;
-}
+// input {
+//   height: auto !important;
+// }
 
 #error_explanation {
   color: red;
@@ -240,6 +247,7 @@ input {
 /*勤怠管理中部*/
 
 .table {
+  width: 100%;
   border: 1px solid #bbb;
   padding: 2px 8px 0;
   text-align: center;
@@ -283,3 +291,98 @@ input {
   text-align: center;
 }
 
+/*お知らせ表示（所属長）*/
+.information {
+  color: red;
+  &:hover {
+  color: red;
+  font-weight: bold;
+  text-decoration: none;
+  }
+  &:visited {
+  color: red; 
+  text-decoration: none;
+  }
+  &:focus {
+  color: red; 
+  text-decoration: none;
+  }
+}
+
+.notification {
+  color: red;
+  font-weight: bold;
+  border: solid 2px red;
+  text-decoration: none;
+}
+
+#current_year, #current_month {
+  display: inline-block;
+  text-align: center;
+  border: solid 1px gray;
+  padding: 2px 0 2px 0;
+  width: 100px;
+  border-radius: 2px;
+  background: #DDDDDD;
+}
+
+#reset-btn {
+  width: 100px;
+  height: 30px;
+  border-radius: 2px;
+  margin-bottom: 3px;
+}
+
+#base-add-popups {
+    color: #fff;
+    width: 20%;
+    height: 40px;
+    border: 1px solid #337ab7;
+    border-radius: 5px;
+    text-align: center;
+    background: #337ab7;
+}
+#base-add {
+    color: white;
+    display: block;
+    padding: 7px 0;
+    text-align: center;
+    text-decoration: none;
+ &:hover {
+  color: white;
+  text-decoration: none;
+  }
+  &:visited {
+  color: white; 
+  text-decoration: none;
+  }
+  &:focus {
+  color: white; 
+  text-decoration: none;
+  }
+}
+
+//　モーダル 拠点情報
+.modal-dialog-center {
+  padding-top: 10%;
+}
+
+.edit_user {
+  display: none;
+}
+
+.user-info {
+  margin-bottom: 10px;
+  height: 30px;
+  width: 150px;
+}
+
+label {
+  margin: 5px 0 5px 0;
+}
+
+.search-content {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid gray;
+}

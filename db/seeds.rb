@@ -9,15 +9,16 @@
 User.create!(id: 1,
              name:  "管理者",
              affiliation: "管理者",
-             employee_number: "admin",
-             password:              "aiueok",
-             password_confirmation: "aiueok",
+             employee_number: "9999",
+             password:              "foobar",
+             password_confirmation: "foobar",
              admin: true,
              activated: true,
              activated_at: Time.zone.now)
 
 User.create!(id: 2,
              name:  "上長A",
+             email: "attendance-system@gmail.com",
              affiliation: "上長",
              password: "foobar",
              password_confirmation: "foobar",
@@ -32,6 +33,7 @@ User.create!(id: 2,
              
 User.create!(id: 3,
              name:  "上長B",
+             email: "attendance-system@gmail.com",
              affiliation: "上長",
              password: "foobar",
              password_confirmation: "foobar",
@@ -46,6 +48,7 @@ User.create!(id: 3,
              
 User.create!(id: 4,
              name:  "一般ユーザーA",
+             email: "attendance-system@gmail.com",
              affiliation: "サンプル一般",
              password: "foobar",
              password_confirmation: "foobar",
@@ -59,6 +62,7 @@ User.create!(id: 4,
              
 User.create!(id: 5,
              name:  "一般ユーザーB",
+             email: "attendance-system@gmail.com",
              affiliation: "サンプル一般",
              password: "foobar",
              password_confirmation: "foobar",
@@ -69,3 +73,11 @@ User.create!(id: 5,
              basic_work_time: "07:30",
              activated: true,
              activated_at: Time.zone.now)
+
+Base.create!(id: 1,
+             base_name: "拠点A",
+             base_type: "勤怠A")
+             
+Base.create!(id: 2,
+             base_name: "拠点B",
+             base_type: "勤怠B")

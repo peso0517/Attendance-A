@@ -7,7 +7,10 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
  require 'csv'
   
   def index
-    @users = User.paginate(page: params[:page])
+    id = cookies[:user_id]
+    @user = User.find(id)
+    @users = User.paginate(page: params[:page]).where(admin: false)
+    # binding.pry
   end
 
   def show
@@ -22,20 +25,31 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
    @overtime_to_sp = Attendance.where(authority_user_id: @user.id, apply_state: 2)
    @overtime_apply = @overtime_to_sp.includes(:user)
    @overtime_applys = @overtime_apply.group_by{|i| i.user.id}
+
    #上長に対する勤怠変更申請の有無
    @attendance_change_to_sp = Attendance.where(edit_authority_user_id: @user.id, attendance_change_state: 2)
    @attendance_change =  @attendance_change_to_sp.includes(:user)
    #上長に対する勤怠変更申請の有無
    @attendance_change_applys = @attendance_change.group_by{|i| i.user.id}
    
-   
+   #１ヶ月勤怠申請の有無
+   @one_month_edit_to_sp = OneMonthAttendance.where(one_month_authority_user_id: @user.id, one_month_apply_state: 2).order('one_month_apply_date')
+#   @one_month_edit = @one_month_edit_to_sp.includes(:user)
+   @one_month_applys = @one_month_edit_to_sp.group_by{|i| i.one_month_applying_user_id}
+    
    if params[:first_day] == nil
       # params[:first_day]が存在しない(つまりデフォルト時) # ▼月初(今月の1日, 00:00:00)を取得します
-      @first_day = Date.new(Date.today.year, Date.today.month)
+      @first_day = Date.today.beginning_of_month
     else
       @first_day = params[:first_day].to_date
    end
    @last_day = @first_day.end_of_month
+   
+    #上長に対する１か月勤怠の申請の有無
+    @one_month_apply = OneMonthAttendance.find_by(one_month_applying_user_id: @user.id,one_month_apply_date: @first_day)
+    if !@one_month_apply.nil?
+      @one_month_appled_user = User.find_by(id: @one_month_apply.one_month_authority_user_id)
+    end
    #曜日表示用に使用する
    @youbi = %w(日 月 火 水 木 金 土)
           
@@ -77,7 +91,8 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
   def attendance_time
     @user = User.find(params[:id])
     @attendance_time = @user.attendances.find_by(day: Date.current)
-    @attendance_time.update_attributes(attendance_time: current_time,edit_attendance_time: current_time)
+    @attendance_time.update_attributes(attendance_time: current_time,
+                                       before_edit_attendance_time: current_time)
     flash[:info] = "出社登録完了しました！！"
     redirect_to @user
   end
@@ -86,7 +101,8 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
   def leaving_time
     @user = User.find(params[:id])
     @leaving_time = @user.attendances.find_by(day: Date.current)
-    @leaving_time.update_attributes(leaving_time: current_time,edit_leaving_time: current_time)
+    @leaving_time.update_attributes(leaving_time: current_time,
+                                     before_edit_leaving_time: current_time)
     flash[:info] = "退社登録完了しました！！"
     redirect_to @user
   end
@@ -130,11 +146,14 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
   def update_basic_info
       @user = User.find(params[:id])
     if @user.update_attributes(users_basic_params)
+        # binding.pry
       # 更新に成功した場合を扱う。
       flash[:success] = "基本情報を修正しました！！"
+      id = cookies[:user_id]
+      @user = User.find(id)
       redirect_to @user
     else
-      render 'edit'
+      render 'index'
     end
   end
 
@@ -158,16 +177,45 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
       end
     end
   end
+  
+  def csv_input
+    # fileはtmpに自動で一時保存される
+    User.import(params[:file])
+    registered_count = import_users
+    redirect_to users_url, notice: "#{registered_count}件登録しました"
+
+  end
+  
+  def work_on_employee
+    @user = User.find(params[:id])
+    @work_on_list = Attendance.where(day: Date.today, leaving_time: nil).where.not(attendance_time: nil).order(user_id: "DESC")
+  end
 
   private
+    def import_users
+      # 登録処理前のレコード数
+      current_user_count = User.count
+    #   users = []
+    #   # windowsで作られたファイルに対応するので、encoding: "SJIS"を付けている
+    #   CSV.foreach(params[:file].path, headers: true) do |row|
+    #     users << User.new({id: row["id"], name: row["name"], email: row["email"] })
+    #   end
+    #   # importメソッドでバルクインサートできる
+    #   User.import(users)
+      # 何レコード登録できたかを返す
+      User.count - current_user_count  
+    #   binding.pry
+    end
+  
     def user_params
-      params.require(:user).permit(:name,:user_card_id ,:employee_number ,:password,
+      params.require(:user).permit(:name,:email,:user_card_id ,:employee_number ,:password,
                                    :password_confirmation,:affiliation,
                                    :specified_work_time,:specified_end_time ,:basic_work_time)
     end
     
     def users_basic_params
-      params.require(:user).permit(:specified_work_time,:specified_end_time , :basic_work_time)
+      params.require(:user).permit(:name,:email,:user_card_id ,:employee_number ,:password,
+                                   :affiliation,:specified_work_time,:specified_end_time ,:basic_work_time)
     end
                 
     # beforeアクション

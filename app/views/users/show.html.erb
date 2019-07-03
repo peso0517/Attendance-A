@@ -33,13 +33,16 @@
   </table>
  <!--上長のみ表示-->
    <% if @user.superior === true %>
-    <%= link_to "【所属長承認申請のお知らせ】", "#" %><br>
+    <%= render 'users/one_month_apply_modal' %>
     <%= render 'users/attendance_edit_modal' %>
     <%= render 'users/one_overtime_approval_modal' %>
    <% end %>
    <% if @user === current_user %>
     <%= link_to "勤怠を編集", edit_attendance_path(params:{id: @user.id, first_day: @first_day}), class: "btn btn-primary" %>
     <%= link_to "CSV出力", csv_output_path(params:{id: @user.id, first_day: @first_day, format: :csv}), class: "btn btn-primary" %>
+    <div data-turbolinks="false">
+    <%= link_to "勤怠修正ログ(承認済)", attendance_log_path(params:{id: @user.id, first_day: @first_day}), class: "btn btn-primary" %>
+    </div>
    <% end %>
   <!--ここから下段の題目　-->
   <br>
@@ -234,8 +237,32 @@
        
        <!--１５列目：所属長承認-->
        <td>
-        所属長承認<br>
-        
+        <p>
+        <% if @one_month_apply.nil? %>
+         所属長承認:未承認
+        <% else %>
+         <% if @one_month_apply.one_month_apply_state == "nothing"  %>
+          所属長承認:未承認
+         <% elsif @one_month_apply.one_month_apply_state == "applying" %>
+          所属長承認：<%= @one_month_appled_user.name %>へ申請中
+         <% elsif @one_month_apply.one_month_apply_state == "applied" %>
+          所属長承認：<%= @one_month_appled_user.name %>により承認済
+         <% else %>
+          所属長承認：<%= @one_month_appled_user.name %>により承認却下
+         <% end %>
+        <% end %>
+        </p>
+        <% if current_user.id == @user.id %>
+         <%= form_for(@user, url: one_month_apply_path, method: :patch) do |f| %>
+          <%= fields_for @one_month_apply do |tf| %>
+           <%= tf.collection_select :one_month_authority_user_id, @superior_user,:id, :name, :include_blank => true %><br>
+          <% end %>
+          <%= hidden_field_tag :one_month_applying_user_id, @user.id %>
+          <%= hidden_field_tag :first_day, @first_day %>
+          <%= hidden_field_tag :one_month_apply_state, "applying" %>
+          <%= f.submit "申請", class: "btn btn-primary" %>
+         <% end %>
+        <% end %>
        </td>
       </tr>
      </tfoot>

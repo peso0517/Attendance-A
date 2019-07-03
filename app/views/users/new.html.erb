@@ -7,6 +7,9 @@
       <%= render 'shared/error_messages', object: f.object %>
       <%= f.label :氏名 %>
       <%= f.text_field :name, class: 'form-control' %>
+      
+      <%= f.label :メールアドレス %>
+      <%= f.text_field :user_card_id, class: 'form-control' %>
 
       <%= f.label :カードID %>
       <%= f.text_field :user_card_id, class: 'form-control' %>

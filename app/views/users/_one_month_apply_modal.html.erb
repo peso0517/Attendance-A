@@ -1,0 +1,57 @@
+<!--モーダル表示勤怠承認-->
+<div id ="attendance-popups">
+ <% if @one_month_edit_to_sp.blank? %>
+  <div id= "one_month_apply">【所属長承認申請のお知らせはありません】</div>
+ <% else %>
+  <a id= "one_month_apply" href="#one-month-apply-modal" class="information">【所属長承認申請のお知らせ】：</a><span class="notification"><%= "#{@one_month_edit_to_sp.count}件の通知があります" %></span><br>
+ <% end %>
+</div>
+
+<div class ="white-popup mfp-with-anim mfp-hide" id = "one-month-apply-modal">
+ <%= form_with model: @user, url: one_maonth_attendance_approval_path, local: true do |f| %>
+ <% @one_month_applys.each do |user_id, attendances| %>
+  <% user = User.find(user_id) %>
+	 <h4 class="title-modal">【<%= user.name %>からの１ヶ月勤怠申請】</h4>
+   <table class = "table attendance-table table-striped table-bordered">
+    <thead>
+     <tr>
+      <th>申請月</th>
+      <th>指示者確認印</th>
+      <th>変更</th>
+      <th>勤怠を確認する</th>
+     </tr>
+    </thead>
+    <% attendances.each do |attendance| %>
+    <%= fields_for "one_month_attendances[]", attendance do |af| %>
+    <tbody>
+      <tr>
+      <!--1行目：日付（月）-->
+       <td><%= attendance.one_month_apply_date.year %>年<%= attendance.one_month_apply_date.month %>月</td>
+      <!--2行目：指示者確認-->
+       <td><%= af.select :one_month_apply_state, OneMonthAttendance.localed_apply_state, {}, class: 'form-control'  %></td>
+      <!--3行目：変更するか否か-->
+       <td>
+         <%= af.check_box :approval_flg, {}, true, false %>
+       </td>
+      <!--4行目：勤怠確認-->
+       <td><%= link_to '確認', user_path(id: user_id, first_day: @first_day), class: "btn btn-primary", :target => "_blank" %></td>
+      </tr>
+     </tbody>
+     <% end %>
+    <% end %>		
+   </table>
+ <% end %>
+ <%= f.submit "変更を送信する", class: "btn btn-primary" %>
+ <% end %>
+</div>
+
+<script>
+ jQuery('#attendance-popups').magnificPopup({
+    delegate: 'a'
+    // callbacks: {
+    //   beforeOpen: function() {
+    //      this.st.mainClass = this.st.el.attr('data-effect');
+    //   },
+    // },
+});
+</script>

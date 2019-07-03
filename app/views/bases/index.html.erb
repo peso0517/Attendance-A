@@ -1,0 +1,34 @@
+<% provide(:title,"拠点情報" ) %>
+
+<div class="base-top">
+  <h1>拠点情報一覧</h1>
+  <table class = "table table-striped table-bordered table-hover">
+   <thead>
+    <tr>
+      <th></th>
+      <th></th>
+      <th>拠点番号</th>
+      <th>拠点名</th>
+      <th>拠点種類</th>
+    </tr>
+   </thead>
+   <tbody>
+    <% @bases.each do |b| %>
+    <tr>
+       <td><%= link_to "編集", edit_base_info_basis_path(b), remote: true, class: "btn btn-primary" %></td>
+       <td><%= link_to "削除", basis_path(b), method: :delete, data: {confirm: "削除してよろしいですか？"}, class: "btn btn-danger" %></td>
+       <td><%= b.id %></td>
+       <td><%= b.base_name %></td>
+       <td><%= b.base_type %></td>
+    </tr>
+    <% end %>
+   </tbody>
+  </table>
+  <div class="base-add">
+    <%= render 'bases/base_add_modal' %>
+    <%#= link_to "拠点情報追加", user_url(@user, params:{first_day: @first_day}),style:"width:200px", class: "btn btn-primary" %>
+  </div>
+</div>
+
+<div id="edit_base_info" class ="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+</div>

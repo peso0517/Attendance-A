@@ -1,0 +1,24 @@
+<% provide(:title,"出勤社員一覧" ) %>
+
+<div class="work_on">
+  <h1>出勤中社員一覧</h1>
+  <table class = "table table-striped table-bordered table-hover">
+   <thead>
+    <tr>
+      <th>社員番号</th>
+      <th>名前</th>
+    </tr>
+   </thead>
+   <tbody>
+    <% @work_on_list.each do |work| %>
+    <tr>
+      <% if work.present? %>
+      <% @work_on_user = User.find(work.user_id) %>
+       <td><%= @work_on_user.employee_number %></td>
+       <td><%= @work_on_user.name %></td>
+      <% end %>
+    </tr>
+    <% end %>
+   </tbody>
+  </table>
+</div>

@@ -1,22 +1,31 @@
 class User < ApplicationRecord
   has_many :microposts, dependent: :destroy
   has_many :attendances, dependent: :destroy
-  has_many :active_relationships,  class_name:  "Relationship",
-                                   foreign_key: "follower_id",
-                                   dependent:   :destroy
-  has_many :passive_relationships, class_name:  "Relationship",
-                                   foreign_key: "followed_id",
-                                   dependent:   :destroy
-  has_many :following, through: :active_relationships,  source: :followed
-  has_many :followers, through: :passive_relationships, source: :follower
-  attr_accessor :remember_token, :activation_token, :reset_token
-  #before_save   :downcase_email
+  has_many :one_month_attendances, dependent: :destroy
+  attr_accessor :remember_token, :activation_token, :reset_tokens
   before_create :create_activation_digest
   validates :name,  presence: true, length: { maximum: 50 }
   VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
   has_secure_password
   validates :password, presence: true, length: { minimum: 6 }, allow_nil: true
+  require 'csv'
+  
+  def self.import(file)
+    users = []
+    CSV.foreach(file.path, headers: true) do |row|
+      # IDが見つかれば、レコードを呼び出し、見つかれなければ、新しく作成
+      # user = find_by(id: row["id"]) || new
+      # CSVからデータを取得し、設定する
+      users << User.new({id: row["id"], name: row["name"], email: row["email"] })
+      # user.attributes = row.to_hash.slice(*updatable_attributes)
+            # 保存する
+    end
+  end
 
+  # 更新を許可するカラムを定義
+  def self.updatable_attributes
+    ["id", "name", "email"]
+  end
   # 渡された文字列のハッシュ値を返す
   def User.digest(string)
     cost = ActiveModel::SecurePassword.min_cost ? BCrypt::Engine::MIN_COST :

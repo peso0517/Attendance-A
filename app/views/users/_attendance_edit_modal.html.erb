@@ -3,7 +3,7 @@
  <% if @attendance_change_to_sp.blank? %>
   <div id= "aaa">【勤怠変更申請のお知らせはありません】</div>
  <% else %>
-  <a id= "aaa" href="#attendance-edit-approval-modal">【勤怠変更申請のお知らせ】</a>：<%= "#{@attendance_change_to_sp.count}件の通知があります。" %></p>
+  <a id= "aaa" href="#attendance-edit-approval-modal" class="information">【勤怠変更申請のお知らせ】：</a><span class="notification"><%= "#{@attendance_change_to_sp.count}件の通知があります" %></span></p>
  <% end %>
 </div>
 

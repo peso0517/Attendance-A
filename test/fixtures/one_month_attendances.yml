@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  one_month_apply_state: 1
+  one_month_apply_date: 2019-05-31
+  one_month_authority_user_id: 1
+  one_month_applying_user_id: 1
+
+two:
+  one_month_apply_state: 1
+  one_month_apply_date: 2019-05-31
+  one_month_authority_user_id: 1
+  one_month_applying_user_id: 1

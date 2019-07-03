@@ -1,10 +1,75 @@
 <% provide(:title, "ユーザー一覧") %>
 <h1>ユーザー一覧</h1>
 
+<%# if flash[:notice] %>
+  <!--<div class="alert alert-info" role="alert"><%= flash[:notice] %></div>-->
+<%# end %>
+
+<div class="search-content">
+  <%= form_tag csv_input_path, method: :post, multipart: true do |f| %>
+    <div class="search_item">
+      <%= text_field_tag 'filename',"", id: "filename", disabled: true %>
+      <%= file_field_tag 'file', id: "file_input", style: "display: none;", onchange: "file_selected($(this));" %>
+      <%= button_tag 'ファイル選択', class: %i(btn-primary csv_input_btn), type: 'button', onclick: "$('#file_input').click();" %>
+    </div>
+      <%= submit_tag "インポート", class: "btn btn-primary" %>
+  <% end %>
+</div>
+
+
 <%= will_paginate %>
 
 <ul class="users">
- <%= render @users %>
+  <% @users.each do |user| %>
+   <div class="accordion">
+    <h4><%= user.name %></h4>
+    <button type="button" class="ac<%= user.id %> btn btn-primary btn-sm user-info">編集</button>
+    　<%= form_for(user, url: update_basic_info_path, method: :post) do |f| %>
+      <%= hidden_field_tag :id, user.id %>
+      <%= render 'shared/error_messages', object: f.object %>
+       <%= f.label :氏名 %>
+       <%= f.text_field :name, class: 'form-control' %>
+      
+       <%= f.label :メールアドレス %>
+       <%= f.text_field :user_card_id, class: 'form-control' %>
+      
+       <%= f.label :所属 %>
+       <%= f.text_field :affiliation, class: 'form-control' %>
+      
+       <%= f.label :社員番号 %>
+       <%= f.text_field :employee_number, class: 'form-control' %>
+      
+       <%= f.label :カードID %>
+       <%= f.text_field :user_card_id, class: 'form-control' %>
+      
+     　<%= f.label :パスワード %>
+       <%= f.password_field :password, class: 'form-control' %>
+      
+   　   <%= f.label :基本勤務時間 %>
+       <%= f.time_field :basic_work_time, class: 'form-control' %>
+
+       <%= f.label :指定勤務開始時間 %>
+       <%= f.time_field :specified_work_time, class: 'form-control'%>
+      
+       <%= f.label :指定勤務終了時間 %>
+       <%= f.time_field :specified_end_time, class: 'form-control'%>
+
+       <%= f.submit "更新", class: "btn btn-primary btn-bg" %>
+      <% end %>
+   </div>
+  <% end %>
 </ul>
 
 <%= will_paginate %>
+
+<script>
+  $('.accordion button').click(function(){
+      $(this).next('form').slideToggle();
+  });
+  
+  function file_selected(file_field){
+    var filename = $(file_field)[0].files[0].name;
+    $("#filename").val(filename);
+  }
+    
+</script>

@@ -14,6 +14,8 @@ gem 'bcrypt',         '3.1.11'
 gem 'will_paginate',           '3.1.6'
 gem 'bootstrap-will_paginate', '1.0.0'
 gem 'enum_help'
+gem 'activerecord-import'
+gem 'roo'
 
 group :development, :test do
   gem 'sqlite3', '1.3.13'

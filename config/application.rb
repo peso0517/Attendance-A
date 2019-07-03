@@ -1,15 +1,16 @@
 require_relative 'boot'
 
-require 'rails/all'
-require 'date'
-require 'time'
+
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
 module SampleApp
   class Application < Rails::Application
-    
+    require 'rails/all'
+require 'date'
+require 'time'
+require 'csv'
     config.time_zone = 'Asia/Tokyo'
     config.active_record.default_timezone = :local
     # Settings in config/environments/* take precedence over those specified here.

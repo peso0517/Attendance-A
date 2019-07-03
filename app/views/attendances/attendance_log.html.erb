@@ -1,0 +1,151 @@
+<% provide(:title,"勤怠編集ログ" ) %>
+
+<div class="log">
+  <h1>勤怠修正ログ（承認済）</h1>
+  <input name="user_id_set" type="hidden" value="<%= @user.id %>" />
+  <div>
+  <input id="reset-btn" type="button" value="リセット" />
+  </div>
+  <div class="log-y">
+   <li class="dropdown">
+    <button class="log-year" href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+      年<b class="caret"></b>
+    </button>
+    <span id="current_year"></span>
+     <ul class="dropdown-menu">
+    　<li class="log_year" id="2018">2018</li>
+      <li class="log_year" id="2019">2019</li>
+      <li class="log_year" id="2020">2020</li>
+      <li class="log_year" id="2021">2021</li>
+     </ul>
+    </li>
+   </div>
+  <div class="log-m">
+   <li class="dropdown">
+    <button class="log-year" href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+      月<b class="caret"></b>
+    </button>
+    <span id="current_month"></span>
+    <ul class="dropdown-menu">
+    　<li class="log_month" id="1">1</li>
+      <li class="log_month" id="2">2</li>
+      <li class="log_month" id="3">3</li>
+      <li class="log_month" id="4">4</li>
+      <li class="log_month" id="5">5</li>
+      <li class="log_month" id="6">6</li>
+      <li class="log_month" id="7">7</li>
+      <li class="log_month" id="8">8</li>
+      <li class="log_month" id="9">9</li>
+      <li class="log_month" id="10">10</li>
+      <li class="log_month" id="11">11</li>
+      <li class="log_month" id="12">12</li>
+    </ul>
+   </li>
+  </div>
+  <!-- テーブル表示  -->
+  <div id="log-at">
+  </div>
+  <center>
+    <%= link_to "戻る", user_url(@user, params:{first_day: @first_day}),style:"width:200px", class: "btn btn-default" %>
+  </center>
+</div>
+
+<script>
+// if(document.URL.match(/attendance_log/)) {
+  $(document).ready(function() {
+    // $(".attendance-info").empty();
+  var user_id = $('input[name="user_id_set"]').val();
+  // 現在日時
+  var current = new Date();
+  // 年
+  var year = current.getFullYear();
+  // 月 0（1月）～11（12月） 
+  var month = current.getMonth() + 1;
+  //ページの表示
+  $('#current_year').text(year);
+  $('#current_month').text(month);
+  
+  //情報の取得
+  sendData(user_id,year,month);
+  //年変更時の処理
+  $('.log_year').on('click', function(){
+     year =  $(this).attr("id");
+     $('#current_year').text(year);
+     sendData(user_id,year,month);
+  }); 
+  //月変更時の処理
+  $('.log_month').on('click', function(){
+     month =  $(this).attr("id");
+     $('#current_month').text(month);
+     sendData(user_id,year,month);
+  });
+  
+   $('#reset-btn').on('click', function(){
+     year = current.getFullYear();
+  // 月 0（1月）～11（12月） 
+     month = current.getMonth() + 1;
+     sendData(user_id,year,month);
+     $('#current_year').text(year);
+     $('#current_month').text(month);
+  });
+  
+  
+});
+ 
+  //ajaxにより、情報を取得
+  let sendData = (user_id,year,month) => {
+    $.get("<%= log_search_path %>",{id: user_id,year: year,month: month},
+        function(data){});
+    }
+    
+    // 以下では、だめだった
+    // $.ajax({
+    //   url:'/log_search',
+    //   type:'GET',
+    //   data:{
+    //           id: user_id,
+    //           year:year,
+    //           month:month},
+    //   dataType: 'html'})
+    //   .done((data) => {
+    //       console.log(data);
+        // $(".attendance-info").append(`<thead><tr><th>日付</th><th>変更前出社時間</th><th>変更前退社時間</th><th>変更後出社時間</th><th>変更後退社時間</th><th>指示者</th><th>承認日</th></tr></thead>`);
+        //   for (let i = 0; i < data.length; i++){
+        //       // 日付
+        //       attendance_day = data[i].day;
+        //       // 変更前出社
+        //       before_edit_attendance_time = "";
+        //       if (data[i].before_edit_attendance_time != null) {
+        //         var beat = new Date(data[i].before_edit_attendance_time);
+        //         before_edit_attendance_hour = beat.getHours();
+        //         before_edit_attendance_min = beat.getMinutes();
+        //         before_edit_attendance_time = before_edit_attendance_hour + "時" + before_edit_attendance_min + "分";
+        //       }
+        //       // 変更前退社
+        //       before_edit_leaving_time = "";
+        //       if (data[i].before_edit_leaving_time != null) {
+        //         var belt = new Date(data[i].before_edit_leaving_time);
+        //         before_edit_leaving_hour = belt.getHours();
+        //         before_edit_leaving_min = belt.getMinutes();
+        //         before_edit_leaving_time = before_edit_leaving_hour + "時" + before_edit_leaving_min + "分";
+        //       }
+        //       // 変更後出社
+        //       var eat = new Date(data[i].edit_attendance_time);
+        //       edit_attendance_hour = eat.getHours();
+        //       edit_attendance_min = eat.getMinutes();
+        //       edit_attendance_time = edit_attendance_hour + "時" + edit_attendance_min + "分";
+        //       // 変更後退社
+        //       var elt = new Date(data[i].edit_leaving_time);
+        //       edit_leaving_hour = elt.getHours();
+        //       edit_leaving_min = elt.getMinutes();
+        //       edit_leaving_time = edit_leaving_hour + "時" + edit_leaving_min + "分";
+        //       // 指示者
+              
+        //       //項目名
+        //   $(".attendance-info").append(`<tbody><tr><td>${attendance_day}</td><td>${before_edit_attendance_time}</td><td>${before_edit_leaving_time}</td><td>${edit_attendance_time}</td><td>${edit_leaving_time}</td><td></td><td></td><td></td><td></td></tr></tbody>`);
+        //   }    
+    // }).fail((data) => {
+    //   console.log("ajax失敗");
+    // });
+  // }
+</script>

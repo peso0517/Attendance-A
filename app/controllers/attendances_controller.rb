@@ -11,25 +11,10 @@ class AttendancesController < ApplicationController
    if current_user.admin || current_user.superior == true || current_user.id == @user.id 
    #上長ユーザー情報を取得
    @superior_user = User.where(superior: true).where.not(id: current_user.id) 
-   
-   
-   if params[:first_day] == nil
-      # params[:first_day]が存在しない(つまりデフォルト時) # ▼月初(今月の1日, 00:00:00)を取得します
-      @first_day = Date.new(Date.today.year, Date.today.month)
-   else
-      @first_day = params[:first_day].to_date
-   end
-      @last_day = @first_day.end_of_month
-      
-      # 今月の初日から最終日の期間分を取得 
-      (@first_day..@last_day).each do |days| #20/27
-        
-      # ない日付はインスタンスを生成して保存する
-       if not @user.attendances.any? { |obj| obj.day == days } #23/26
-        dates = Attendance.new(user_id: @user.id, day: days) 
-        dates.save
-       end #23/26
-      end #20/27
+    
+    #日付取得
+    @first_day = params[:first_day].to_date
+    @last_day = @first_day.end_of_month
     # 当月を昇順で取得し@daysへ代入
     @days = @user.attendances.where('day >= ? and day <= ?', @first_day, @last_day).order('day')
     #在社時間表示
@@ -77,19 +62,24 @@ class AttendancesController < ApplicationController
    attendance_edit_approval_params.each do |id, item|
     attendance = Attendance.find(id)
       if item[:change_flg] === "true"
-       if attendance.before_edit_attendance_time.blank? 
-          attendance.update_attributes(before_edit_attendance_time: attendance.edit_attendance_time)
-       end
-       if attendance.before_edit_leaving_time.blank?
-        attendance.update_attributes(before_edit_leaving_time: attendance.edit_leaving_time)
-       end
        #申請された内容を更新する。
        attendance.update_attributes(item)
        attendance.update_attributes(change_flg: "false")
        #承認されたら、出社時間と退社時間を更新する。
        if attendance.attendance_change_state == "applied3"
-        attendance.update_attributes(attendance_time: attendance.edit_attendance_time,leaving_time: attendance.edit_leaving_time)
+        attendance.update_attributes(attendance_time: attendance.edit_attendance_time,
+                                     leaving_time: attendance.edit_leaving_time,
+                                     latest_edit_approval_date: Date.today)
        end
+       
+       #最初の登録時間が入ってなければ
+       # if attendance.before_edit_attendance_time.blank?
+       #   attendance.update_attributes(before_edit_attendance_time: attendance.before_edit_attendance_time)
+       # end
+       # #
+       # if attendance.before_edit_attendance_time.blank?
+       #   attendance.update_attributes(before_edit_attendance_time: attendance.before_edit_attendance_time)
+       # end
         flash[:info] = "変更しました！"
       end
    end
@@ -129,6 +119,69 @@ class AttendancesController < ApplicationController
       end
       redirect_to current_user
   end
+  
+  #１ヶ月分勤怠申請
+  def one_month_apply
+   if params[:one_month_authority_user_id].blank?
+      flash[:danger] = "1ヶ月分の勤怠申請を行う場合、所属長を選択してください。"
+   else
+      @user = User.find_by(id: params[:one_month_applying_user_id])
+      @first_day = params[:first_day].to_date
+      # ない日付はインスタンスを生成して保存する
+       if not OneMonthAttendance.any? { |obj| obj.one_month_apply_date == @first_day && obj.one_month_applying_user_id == @user.id}
+         one_month_apply = OneMonthAttendance.create(one_month_applying_user_id: @user.id, one_month_apply_date: @first_day)
+       end
+        @one_month_apply = OneMonthAttendance.find_by(one_month_applying_user_id: @user.id,one_month_apply_date: @first_day)
+        @one_month_apply.update_attributes(one_month_apply_state: params[:one_month_apply_state],
+                                           one_month_authority_user_id: params[:one_month_authority_user_id])
+    flash[:info] = "#{@first_day.year}年#{@first_day.month}月分の勤怠申請しました！！"
+   end
+    redirect_to current_user
+  end
+  
+   #1ヶ月勤怠承認
+  def one_month_attendance_approval
+   one_month_apply_params.each do |id, item|
+    one_month_attendance = OneMonthAttendance.find(id)
+      if item[:approval_flg] === "true"
+       #申請された内容を更新する。
+       one_month_attendance.update_attributes(item)
+       one_month_attendance.update_attributes(approval_flg: "false")
+        flash[:info] = "変更しました！"
+      end
+   end
+      redirect_to current_user
+      
+  end
+  
+  def attendance_log
+   @user = User.find(params[:id])
+   if current_user.admin || current_user.superior == true || current_user.id == @user.id 
+
+    #日付取得
+    @first_day = params[:first_day].to_date
+    @last_day = @first_day.end_of_month
+    # 当月を昇順で取得し@daysへ代入
+    @days = @user.attendances.where('day >= ? and day <= ?', @first_day, @last_day).order('day')
+
+    #曜日表示用に使用する
+    @youbi = %w(日 月 火 水 木 金 土)
+    
+  else 
+    flash[:warning] = "他ユーザーの情報を閲覧することができません！"
+    redirect_to current_user
+  end
+ end
+  
+  def log_search
+   @year = params[:year].to_i
+   @month = params[:month].to_i
+   @day = Date.new(@year,@month,1)
+   @last_day = @day.end_of_month
+   @user = User.find(params[:id])
+   @days = Attendance.where(user_id: @user.id).where('day >= ? and day <= ?', @day, @last_day).order('day')
+   @attendance = @days.where(attendance_change_state: 3)
+  end
 
  private
   
@@ -143,4 +196,10 @@ class AttendancesController < ApplicationController
   def attendance_edit_approval_params
    params.permit(attendances: [:attendance_change_state,:change_flg])[:attendances]
   end
+  
+  #１ヶ月勤怠承認
+  def one_month_apply_params
+   params.permit(one_month_attendances: [:one_month_apply_state,:approval_flg])[:one_month_attendances]
+  end
+  
 end

@@ -3,7 +3,7 @@
  <% if @overtime_to_sp.blank? %>
   <div id= "ddd">【残業申請のお知らせはありません】</div>
  <% else %>
-  <a id= "ddd" href="#one-overtime-approval-modal">【残業申請のお知らせ】</a>：<%= "#{@overtime_to_sp.count}件の通知があります。" %><br>
+  <a id= "ddd" href="#one-overtime-approval-modal" class="information">【残業申請のお知らせ】：</a><span class="notification"><%= "#{@overtime_to_sp.count}件の通知があります" %></span><br>
  <% end %>
 </div>
 
