@@ -1,3 +1,4 @@
+<% if !current_user.admin? %>
 <% provide(:title, "勤怠表示画面") %>
   <table class="table table-bordered">
    <tbody>
@@ -5,15 +6,19 @@
      <!--#params[:first_day]に前月or翌月の情報を入れてControllerへ渡してあげます 
       #▼前月の情報を渡す  --->
      <td> 
-      <%= link_to "◀︎", user_path(first_day: @first_day.prev_month) %>
-    　<%= @first_day.year %>年<%= @first_day.month %>月の時間管理表
+      <% if current_user.id == @user.id %>
+        <%= link_to "◀︎", user_path(first_day: @first_day.prev_month) %>
+      　<%= @first_day.year %>年<%= @first_day.month %>月の時間管理表
          <!-- #▼翌月の情報を渡す -->
-      <%= link_to "▶️︎", user_path(first_day: @first_day.next_month) %>
+        <%= link_to "▶️︎", user_path(first_day: @first_day.next_month) %>
+      <% else %>
+        <%= @first_day.year %>年<%= @first_day.month %>月の時間管理表
+      <% end %>
      </td>
      
      <td>
-      指定勤務開始時間:<%= basic_info_times(@user.specified_work_time) if @user.specified_work_time.present? %><br>
-      指定勤務終了時間:<%= basic_info_times(@user.specified_end_time) if @user.specified_end_time.present? %>
+      指定勤務開始時間:<%= basic_info_times(@user.designated_work_start_time) if @user.designated_work_start_time.present? %><br>
+      指定勤務終了時間:<%= basic_info_times(@user.designated_work_end_time) if @user.designated_work_end_time.present? %>
      </td>
      
      <td colspan="3">基本時間:<%= basic_info_times(@user.basic_work_time) if @user.basic_work_time.present? %></td>
@@ -25,14 +30,14 @@
      <td>所属:<%= @user.affiliation %></td>
      <td>氏名:<%= @user.name %></td>
      <td>社員番号:<%= @user.employee_number %></td>
-     <td>カードID:<%= @user.user_card_id %></td>
+     <td>カードID:<%= @user.uid %></td>
      <td>出勤日数:<%= @attendance_sum %></td>
      <td>締め:<%= @last_day.month %>/<%= @last_day.day %></td>
     </tr>
    </tbody>
   </table>
  <!--上長のみ表示-->
-   <% if @user.superior === true %>
+   <% if @user.superior === true && current_user.id == @user.id %>
     <%= render 'users/one_month_apply_modal' %>
     <%= render 'users/attendance_edit_modal' %>
     <%= render 'users/one_overtime_approval_modal' %>
@@ -71,7 +76,7 @@
       <th colspan = "2">終了予定時間</th>
       <th rowspan = "2">時間外勤務時間</th>
       <th rowspan = "2">業務処理内容</th>
-      <th rowspan = "2">指示者</th>
+      <th rowspan = "2">指示者確認㊞</th>
      </tr>
       <!--3列目-->
      <tr>
@@ -158,9 +163,9 @@
        <td>
         <% if d.overtime_plan.present? %>
          <% if d.check === 1 %>
-          <%= format("%.1f", (Time.new(d.day.year,d.day.month,d.day.day,d.overtime_plan.hour,d.overtime_plan.min) + 1.day - Time.new(d.day.year,d.day.month,d.day.day,@user.specified_end_time.hour,@user.specified_end_time.min))/3600) %>
+          <%= format("%.1f", (Time.new(d.day.year,d.day.month,d.day.day,d.overtime_plan.hour,d.overtime_plan.min) + 1.day - Time.new(d.day.year,d.day.month,d.day.day,@user.designated_work_end_time.hour,@user.designated_work_end_time.min))/3600) %>
          <% else %> 
-          <%= format("%.1f", (Time.new(d.day.year,d.day.month,d.day.day,d.overtime_plan.hour,d.overtime_plan.min) - Time.new(d.day.year,d.day.month,d.day.day,@user.specified_end_time.hour,@user.specified_end_time.min))/3600) %>
+          <%= format("%.1f", (Time.new(d.day.year,d.day.month,d.day.day,d.overtime_plan.hour,d.overtime_plan.min) - Time.new(d.day.year,d.day.month,d.day.day,@user.designated_work_end_time.hour,@user.designated_work_end_time.min))/3600) %>
          <% end %>
         <% end %>
        </td>
@@ -253,14 +258,19 @@
         <% end %>
         </p>
         <% if current_user.id == @user.id %>
-         <%= form_for(@user, url: one_month_apply_path, method: :patch) do |f| %>
+         <%= form_tag one_month_apply_path, method: :patch do %>
           <%= fields_for @one_month_apply do |tf| %>
            <%= tf.collection_select :one_month_authority_user_id, @superior_user,:id, :name, :include_blank => true %><br>
           <% end %>
           <%= hidden_field_tag :one_month_applying_user_id, @user.id %>
           <%= hidden_field_tag :first_day, @first_day %>
           <%= hidden_field_tag :one_month_apply_state, "applying" %>
-          <%= f.submit "申請", class: "btn btn-primary" %>
+          <% if @one_month_apply.nil? %> 
+            <%= hidden_field_tag :apply_times, 1 %>
+          <% else %>
+            <%= hidden_field_tag :apply_times, @one_month_apply.apply_times %>
+          <% end %>
+          <%= submit_tag "申請", class: "btn btn-primary" %>
          <% end %>
         <% end %>
        </td>
@@ -268,3 +278,9 @@
      </tfoot>
     </table>
    </div>
+<% else %>
+<h1>管理者用ページ</h1>
+<center>
+<h3>〜ヘッダーの項目より、各種処理が可能です。〜</h3>
+</center>
+<% end %>

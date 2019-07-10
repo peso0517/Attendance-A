@@ -1,8 +1,9 @@
  <% provide(:title,"勤怠編集画面" ) %>
-
-  <div>
    <h1>勤怠編集画面</h1>
-    <%= form_for(@user, url: attendance_update_path, method: :post) do |f| %>
+   
+     <%= form_tag attendance_update_path, method: :post do  %>
+     <%= hidden_field_tag :id, @user.id %>
+     <%= hidden_field_tag :first_day, @first_day %>
     <table class = "table table-striped table-bordered table-condensed">
     <!--勤怠情報表示ヘッダー-->
      <thead>
@@ -18,24 +19,19 @@
        <th>指示者</th>
       </tr>
      </thead>
-  
   <!--勤怠編集テーブル-->
    <tbody>
+     <% @days.each do |d| %>
+     <%= fields_for "attendances[]", d do |tf| %>
     <tr>
-     <%= hidden_field_tag :id, @user.id %>
-     <%= hidden_field_tag :first_day, @first_day %>
-      <% @days.each do |d| %>
-      
-       <%= fields_for "attendances[]", d do |tf| %>
-        
-        <!--１列目：日付-->
-        <td><%= d.day.month %>/<%= d.day.day %></td>
-       
-        <!--２列目：曜日-->
-        <td><%= @youbi[d.day.wday] %></td>
-       
-        <!--３列目：出社時間表示（データが存在する場合）-->
-        <td><%= tf.time_field :edit_attendance_time, class: 'form-control' %></td>
+      <!--１列目：日付-->
+      <td><%= d.day.month %>/<%= d.day.day %></td>
+    
+      <!--２列目：曜日-->
+      <td><%= @youbi[d.day.wday] %></td>
+     
+      <!--３列目：出社時間表示（データが存在する場合）-->
+      <td><%= tf.time_field :edit_attendance_time, class: 'form-control' %></td>
       
       <!--４列目：退社時間表示(データが存在する場合)-->
       <td>
@@ -55,28 +51,22 @@
         <% end %>
        <% end %>
       </td>
-
        <!--７列目：備考（空欄）-->
       <td>
        <%= tf.text_field :remarks, class: 'form-control' %>
       </td>
-       
        <!--８列目：残業指示（空欄）-->
       <td>
        <%= tf.collection_select :edit_authority_user_id, @superior_user,:id, :name, :include_blank => true %>
       </td>
      </tr>
      <% end %>
-    <% end %>
+     <% end %>
    </tbody>
   </table>
-  
-   <center>
-    <br>
-    <%= f.submit "変更を送信する", style:"width:300px", class: "btn btn-primary" %>
+  <center>
+    <%= submit_tag "変更を送信する", style:"width:300px", class: "btn btn-primary" %>
     <%= link_to "キャンセル", user_url(@user, params:{first_day: @first_day}),\
         style:"width:300px", class: "btn btn-default" %>
-    </br>
    </center>
   <% end %>
- </div>

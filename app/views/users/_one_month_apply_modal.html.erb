@@ -8,7 +8,7 @@
 </div>
 
 <div class ="white-popup mfp-with-anim mfp-hide" id = "one-month-apply-modal">
- <%= form_with model: @user, url: one_maonth_attendance_approval_path, local: true do |f| %>
+ <%= form_with model: @user, url: one_month_attendance_approval_path, local: true do |f| %>
  <% @one_month_applys.each do |user_id, attendances| %>
   <% user = User.find(user_id) %>
 	 <h4 class="title-modal">【<%= user.name %>からの１ヶ月勤怠申請】</h4>
@@ -16,7 +16,7 @@
     <thead>
      <tr>
       <th>申請月</th>
-      <th>指示者確認印</th>
+      <th>指示者確認㊞</th>
       <th>変更</th>
       <th>勤怠を確認する</th>
      </tr>

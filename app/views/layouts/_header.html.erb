@@ -1,13 +1,10 @@
 <% if current_user?(@user) %>
 <header class="navbar navbar-fixed-top navbar-inverse">
   <div class="container">
-   
-    <%= link_to "勤怠管理システム", current_user, id: "logo" %>
-
+   <%= link_to "勤怠管理システム", current_user, id: "logo" %>
     <nav>
       <ul class="nav navbar-nav navbar-right">
          <li><%= link_to "トップへ", current_user %></li>
-
         <% if logged_in? %>  
         <% if current_user.admin == true %>
           <li><%= link_to "ユーザー一覧", users_path(id: @user.id) %></li>
@@ -23,7 +20,9 @@
             
             
             <ul class="dropdown-menu">
+            <% if !admin?(@user) %>
               <li><%= link_to "勤怠表示画面", current_user %></li>
+            <% end %>
               <li><%= link_to "個人情報編集画面", edit_user_path(current_user)  %></li>
 
               <li class="divider"></li>

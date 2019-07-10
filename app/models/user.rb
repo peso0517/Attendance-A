@@ -1,7 +1,8 @@
 class User < ApplicationRecord
-  has_many :microposts, dependent: :destroy
+  # has_many :microposts, dependent: :destroy
   has_many :attendances, dependent: :destroy
-  has_many :one_month_attendances, dependent: :destroy
+  has_many :one_month_attendances
+  #dependent: :destroy
   attr_accessor :remember_token, :activation_token, :reset_tokens
   before_create :create_activation_digest
   validates :name,  presence: true, length: { maximum: 50 }
@@ -12,19 +13,37 @@ class User < ApplicationRecord
   
   def self.import(file)
     users = []
+    #重複id
+    overlap_id = []
     CSV.foreach(file.path, headers: true) do |row|
-      # IDが見つかれば、レコードを呼び出し、見つかれなければ、新しく作成
-      # user = find_by(id: row["id"]) || new
-      # CSVからデータを取得し、設定する
-      users << User.new({id: row["id"], name: row["name"], email: row["email"] })
-      # user.attributes = row.to_hash.slice(*updatable_attributes)
-            # 保存する
+
+      if exists?(id: row["id"])
+        overlap_id.push(row["id"])
+        next
+      end
+      user = new(row.to_hash.slice(*updatable_attributes))
+      
+      if user.valid?
+        users.push(user)
+      else
+        return "id#{row["id"]}のデータに不備があったため入力失敗しました"
+      end
+    end
+    
+    users.each do |user|
+      if !user.save
+        return "id#{user.id}のデータ保存時にエラーが発生しました"
+      end
+          # 重複したidがあればメッセージに表示
+      return "アップデートが成功しました"
     end
   end
 
   # 更新を許可するカラムを定義
   def self.updatable_attributes
-    ["id", "name", "email"]
+    ["id", "name", "email", "affiliation", "employee_number","uid",
+     "basic_work_time", "designated_work_start_time", "designated_work_end_time", "superior",
+     "password"]
   end
   # 渡された文字列のハッシュ値を返す
   def User.digest(string)
@@ -108,7 +127,7 @@ class User < ApplicationRecord
 
   
   private
-    # 有効化トークンとダイジェストを作成および代入する
+  # 有効化トークンとダイジェストを作成および代入する
     def create_activation_digest
       self.activation_token  = User.new_token
       self.activation_digest = User.digest(activation_token)

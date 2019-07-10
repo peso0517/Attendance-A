@@ -17,7 +17,7 @@ Rails.application.routes.draw do
   patch  '/one_overtime_approval',    to: 'attendances#one_overtime_approval'
   patch  '/attendance_edit_approval', to: 'attendances#attendance_edit_approval'
   patch  '/one_month_apply',          to: 'attendances#one_month_apply'
-  patch  '/one_maonth_attendance_approval', to: 'attendances#one_maonth_attendance_approval'
+  patch  '/one_month_attendance_approval', to: 'attendances#one_month_attendance_approval'
   get    '/attendance_log',           to: 'attendances#attendance_log'
   get    '/log_search',               to: 'attendances#log_search'
   get    '/csv_output',               to: 'users#csv_output'
@@ -30,7 +30,7 @@ Rails.application.routes.draw do
   end
   resources :account_activations, only: [:edit]
   resources :password_resets,     only: [:new, :create, :edit, :update]
-  resources :microposts,          only: [:create, :destroy]
+  # resources :microposts,          only: [:create, :destroy]
   resources :relationships,       only: [:create, :destroy]
   resources :attendances
   resources :bases do

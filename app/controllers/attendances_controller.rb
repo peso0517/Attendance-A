@@ -2,13 +2,11 @@ class AttendancesController < ApplicationController
    before_action :logged_in_user
    include UsersHelper
    include AttendanceHelper
-
-   
    
   def edit
    @user = User.find(params[:id])
       
-   if current_user.admin || current_user.superior == true || current_user.id == @user.id 
+  # / if current_user.admin || current_user.superior == true || current_user.id == @user.id 
    #上長ユーザー情報を取得
    @superior_user = User.where(superior: true).where.not(id: current_user.id) 
     
@@ -19,11 +17,11 @@ class AttendancesController < ApplicationController
     @days = @user.attendances.where('day >= ? and day <= ?', @first_day, @last_day).order('day')
     #在社時間表示
     @days.each do |d|
-    if d.attendance_time.present? && d.leaving_time.present?
+      if d.attendance_time.present? && d.leaving_time.present?
         second = 0
         second = times(d.attendance_time,d.leaving_time)
         @total_time = @total_time.to_i + second.to_i
-    end
+      end
     end
     
     #出勤日数表示
@@ -32,11 +30,11 @@ class AttendancesController < ApplicationController
     #曜日表示用に使用する
     @youbi = %w(日 月 火 水 木 金 土)
     
-  else 
-    flash[:warning] = "他ユーザーの情報を閲覧することができません！"
-    redirect_to current_user
+  # else 
+  #   flash[:warning] = "他ユーザーの情報を閲覧することができません！"
+  #   redirect_to current_user
   end
-  end
+  # //= require turbolinks
  
   #勤怠変更申請
   def attendance_update
@@ -49,7 +47,7 @@ class AttendancesController < ApplicationController
           attendance.update_attributes(attendance_change_state: "applying2")
          end
        end
-      flash[:success] = '勤怠時間を更新しました。'
+      flash[:success] = '勤怠変更を申請しました。'
       redirect_to user_url(@user, params:{ id: @user.id, first_day: params[:first_day]})
     else
       flash[:warning] = '不正な入力があります。再度申請してください。'
@@ -69,7 +67,7 @@ class AttendancesController < ApplicationController
        if attendance.attendance_change_state == "applied3"
         attendance.update_attributes(attendance_time: attendance.edit_attendance_time,
                                      leaving_time: attendance.edit_leaving_time,
-                                     latest_edit_approval_date: Date.today)
+                                     latest_approval_date: Date.today)
        end
        
        #最初の登録時間が入ってなければ
@@ -94,7 +92,7 @@ class AttendancesController < ApplicationController
     @overtime_apply = params[:overtime_plan].in_time_zone
     if  params[:overtime_plan].blank? || params[:business_process].blank? || params[:authority_user_id].blank?
      flash[:danger] = "未入力項目がありました。再度申請してください。"
-    elsif params[:check] == "0" && ((@overtime_apply.hour + @overtime_apply.min)) - (@user.specified_end_time.hour + @user.specified_end_time.min) < 0
+    elsif params[:check] == "0" && ((@overtime_apply.hour + @overtime_apply.min)) - (@user.designated_work_end_time.hour + @user.designated_work_end_time.min) < 0
      flash[:danger] = "不正な時間入力がありました。再度申請してください。"
     else
      @one_overtime_apply.update_attributes(overtime_plan: params[:overtime_plan],
@@ -122,21 +120,45 @@ class AttendancesController < ApplicationController
   
   #１ヶ月分勤怠申請
   def one_month_apply
-   if params[:one_month_authority_user_id].blank?
-      flash[:danger] = "1ヶ月分の勤怠申請を行う場合、所属長を選択してください。"
-   else
-      @user = User.find_by(id: params[:one_month_applying_user_id])
-      @first_day = params[:first_day].to_date
-      # ない日付はインスタンスを生成して保存する
+   if params[:apply_times] == "1"
+     if params[:one_month_authority_user_id].blank?
+       flash[:danger] = "1ヶ月分の勤怠申請を行う場合、所属長を選択してください。"
+     else
+       @user = User.find_by(id: params[:one_month_applying_user_id])
+       @first_day = params[:first_day].to_date
+       # ない日付はインスタンスを生成して保存する
        if not OneMonthAttendance.any? { |obj| obj.one_month_apply_date == @first_day && obj.one_month_applying_user_id == @user.id}
          one_month_apply = OneMonthAttendance.create(one_month_applying_user_id: @user.id, one_month_apply_date: @first_day)
        end
         @one_month_apply = OneMonthAttendance.find_by(one_month_applying_user_id: @user.id,one_month_apply_date: @first_day)
         @one_month_apply.update_attributes(one_month_apply_state: params[:one_month_apply_state],
-                                           one_month_authority_user_id: params[:one_month_authority_user_id])
-    flash[:info] = "#{@first_day.year}年#{@first_day.month}月分の勤怠申請しました！！"
+                                           one_month_authority_user_id: params[:one_month_authority_user_id],
+                                           apply_times: 2)
+                             
+        flash[:info] = "#{@first_day.year}年#{@first_day.month}月分の勤怠申請しました！！"
+        # redirect_to current_user
+     end
+    
+   else 
+     if params[:one_month_attendance][:one_month_authority_user_id].blank?
+         flash[:danger] = "1ヶ月分の勤怠申請を行う場合、所属長を選択してください。"
+     else
+       @user = User.find_by(id: params[:one_month_applying_user_id])
+       @first_day = params[:first_day].to_date
+       # ない日付はインスタンスを生成して保存する
+       if not OneMonthAttendance.any? { |obj| obj.one_month_apply_date == @first_day && obj.one_month_applying_user_id == @user.id}
+         one_month_apply = OneMonthAttendance.create(one_month_applying_user_id: @user.id, one_month_apply_date: @first_day)
+       end
+        @one_month_apply = OneMonthAttendance.find_by(one_month_applying_user_id: @user.id,one_month_apply_date: @first_day)
+        @one_month_apply.update_attributes(one_month_apply_state: params[:one_month_apply_state],
+                                           one_month_authority_user_id: params[:one_month_attendance][:one_month_authority_user_id])
+                             
+        flash[:info] = "#{@first_day.year}年#{@first_day.month}月分の勤怠申請しました！！"
+        
+     end
+
    end
-    redirect_to current_user
+       redirect_to current_user
   end
   
    #1ヶ月勤怠承認

@@ -70,4 +70,12 @@ module SessionsHelper
     session[:forwarding_url] = request.original_url if request.get?
   end
   
+  #管理者であるか判定する。
+  def admin?(user)
+    if !user.nil?
+     user.admin == true
+    else 
+     false
+    end
+  end
 end

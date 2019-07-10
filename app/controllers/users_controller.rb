@@ -9,82 +9,94 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
   def index
     id = cookies[:user_id]
     @user = User.find(id)
-    @users = User.paginate(page: params[:page]).where(admin: false)
-    # binding.pry
+    if current_user.admin && @user.admin
+     @users = User.paginate(page: params[:page])
+    else
+     flash[:warning] = "他ユーザーを閲覧することはできません。"
+     redirect_to login_url
+    end
   end
 
-  def show
-   #ユーザー情報を取得
-   @user = User.find(params[:id])
-  if current_user.admin || current_user.superior == true || current_user.id == @user.id 
-   #表示用上長ユーザー情報を取得
-   @superior_user = User.where(superior: true).where.not(id: current_user.id)
-   #セレクトボックス用上長ユーザー情報
-   @superior = User.where(superior: true)
-   #上長に対する残業申請の有無
-   @overtime_to_sp = Attendance.where(authority_user_id: @user.id, apply_state: 2)
-   @overtime_apply = @overtime_to_sp.includes(:user)
-   @overtime_applys = @overtime_apply.group_by{|i| i.user.id}
-
-   #上長に対する勤怠変更申請の有無
-   @attendance_change_to_sp = Attendance.where(edit_authority_user_id: @user.id, attendance_change_state: 2)
-   @attendance_change =  @attendance_change_to_sp.includes(:user)
-   #上長に対する勤怠変更申請の有無
-   @attendance_change_applys = @attendance_change.group_by{|i| i.user.id}
-   
-   #１ヶ月勤怠申請の有無
-   @one_month_edit_to_sp = OneMonthAttendance.where(one_month_authority_user_id: @user.id, one_month_apply_state: 2).order('one_month_apply_date')
-#   @one_month_edit = @one_month_edit_to_sp.includes(:user)
-   @one_month_applys = @one_month_edit_to_sp.group_by{|i| i.one_month_applying_user_id}
-    
-   if params[:first_day] == nil
-      # params[:first_day]が存在しない(つまりデフォルト時) # ▼月初(今月の1日, 00:00:00)を取得します
-      @first_day = Date.today.beginning_of_month
+ def show
+    #管理者ユーザーは取得できない
+    id = cookies[:user_id]
+    @user_confirm = User.find(id)
+    #ユーザー情報を取得
+    @user = User.find(params[:id])
+    if @user_confirm.admin? || @user.admin
+      if @user != @user_confirm
+        flash[:warning] = "他ユーザーを閲覧することはできません。"
+        redirect_to current_user
+      end
     else
-      @first_day = params[:first_day].to_date
-   end
-   @last_day = @first_day.end_of_month
-   
-    #上長に対する１か月勤怠の申請の有無
-    @one_month_apply = OneMonthAttendance.find_by(one_month_applying_user_id: @user.id,one_month_apply_date: @first_day)
-    if !@one_month_apply.nil?
-      @one_month_appled_user = User.find_by(id: @one_month_apply.one_month_authority_user_id)
+      #管理者でなければ、勤怠情報を確認することができる。
+      if (current_user.superior == true || current_user.id == @user.id) && (!@user_confirm.admin? || !@user.admin?)
+        #表示用上長ユーザー情報を取得
+        @superior_user = User.where(superior: true).where.not(id: current_user.id)
+        #セレクトボックス用上長ユーザー情報
+        @superior = User.where(superior: true)
+        #上長に対する残業申請の有無
+        @overtime_to_sp = Attendance.where(authority_user_id: @user.id, apply_state: 2)
+        @overtime_apply = @overtime_to_sp.includes(:user)
+        @overtime_applys = @overtime_apply.group_by{|i| i.user.id}
+        #上長に対する勤怠変更申請の有無
+        @attendance_change_to_sp = Attendance.where(edit_authority_user_id: @user.id, attendance_change_state: 2)
+        @attendance_change =  @attendance_change_to_sp.includes(:user)
+        #上長に対する勤怠変更申請の有無
+        @attendance_change_applys = @attendance_change.group_by{|i| i.user.id}
+        #１ヶ月勤怠申請の有無
+        @one_month_edit_to_sp = OneMonthAttendance.where(one_month_authority_user_id: @user.id, one_month_apply_state: 2).order('one_month_apply_date')
+        #@one_month_edit = @one_month_edit_to_sp.includes(:user)
+        @one_month_applys = @one_month_edit_to_sp.group_by{|i| i.one_month_applying_user_id}
+       
+        if params[:first_day] == nil
+          # params[:first_day]が存在しない(つまりデフォルト時) # ▼月初(今月の1日, 00:00:00)を取得します
+          @first_day = Date.today.beginning_of_month
+        else
+          @first_day = params[:first_day].to_date
+        end
+        @last_day = @first_day.end_of_month
+        #上長に対する１か月勤怠の申請の有無
+        @one_month_apply = OneMonthAttendance.find_by(one_month_applying_user_id: @user.id,one_month_apply_date: @first_day)
+        if !@one_month_apply.nil?
+          @one_month_appled_user = User.find_by(id: @one_month_apply.one_month_authority_user_id)
+        end
+        #曜日表示用に使用する
+        @youbi = %w(日 月 火 水 木 金 土)
+        #今月の初日から最終日の期間分を取得 
+        (@first_day..@last_day).each do |days|
+          #ない日付はインスタンスを生成して保存する
+          if not @user.attendances.any? { |obj| obj.day == days }
+            dates = Attendance.new(user_id: @user.id, day: days)
+            dates.save
+          end
+        end 
+        #当月を昇順で取得し@daysへ代入
+        @days = @user.attendances.where('day >= ? and day <= ?', @first_day, @last_day).order('day')
+        #出勤日数表示
+        @attendance_sum = @days.where.not(attendance_time: nil, leaving_time: nil).count
+        #在社時間表示
+        second = 0
+        next_second = 0
+        @total_time = 0
+        @days.each do |d|
+          if d.attendance_time.present? && d.leaving_time.present?
+            if d.edit_next_check == 0
+              second = second + times(d.attendance_time,d.leaving_time)
+              @total_time = @total_time + second.to_i
+            end
+            if d.edit_next_check == 1
+              next_second = next_second + next_times(d.attendance_time,d.leaving_time)
+              @total_time = @total_time + next_second.to_i
+            end
+          end
+        end
+      #superior以外は他ユーザー情報を見れない。
+      else 
+        flash[:warning] = "他ユーザーの情報を閲覧することができません！"
+        redirect_to current_user
+      end
     end
-   #曜日表示用に使用する
-   @youbi = %w(日 月 火 水 木 金 土)
-          
-   # 今月の初日から最終日の期間分を取得 
-   (@first_day..@last_day).each do |days|
-   # ない日付はインスタンスを生成して保存する
-     if not @user.attendances.any? { |obj| obj.day == days }
-      dates = Attendance.new(user_id: @user.id, day: days)
-      dates.save
-     end
-   end 
-   # 当月を昇順で取得し@daysへ代入
-   @days = @user.attendances.where('day >= ? and day <= ?', @first_day, @last_day).order('day')
-   #出勤日数表示
-   @attendance_sum = @days.where.not(attendance_time: nil, leaving_time: nil).count
-   #在社時間表示
-    second = 0
-    next_second = 0
-    @total_time = 0
-    @days.each do |d|
-     if d.attendance_time.present? && d.leaving_time.present?
-       if d.edit_next_check == 0
-        second = second + times(d.attendance_time,d.leaving_time)
-        @total_time = @total_time + second.to_i
-       end
-       if d.edit_next_check == 1
-        next_second = next_second + next_times(d.attendance_time,d.leaving_time)
-        @total_time = @total_time + next_second.to_i
-       end
-     end
-   end
-   else 
-    flash[:warning] = "他ユーザーの情報を閲覧することができません！"
-    redirect_to current_user
-   end
   end
   
   #出社時間
@@ -123,6 +135,12 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
   end
 
   def edit
+  end
+  
+  def destroy
+    User.find(params[:id]).destroy
+    flash[:success] = "ユーザー情報を削除しました！！"
+    redirect_to s_path
   end
   
   def update
@@ -180,42 +198,41 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
   
   def csv_input
     # fileはtmpに自動で一時保存される
-    User.import(params[:file])
-    registered_count = import_users
-    redirect_to users_url, notice: "#{registered_count}件登録しました"
-
+    if !params[:file].blank?
+      # 保存と結果のメッセージを取得して表示
+      message = User.import(params[:file])
+      if message == []
+        flash[:notice] = "インポートするユーザが存在しません。"
+      elsif message.present?
+        flash[:notice] = message
+      end
+    else
+      flash[:error] = "読み込むCSVファイルをセットしてください"
+    end
+    redirect_to users_path
   end
   
   def work_on_employee
-    @user = User.find(params[:id])
-    @work_on_list = Attendance.where(day: Date.today, leaving_time: nil).where.not(attendance_time: nil).order(user_id: "DESC")
+    id = cookies[:user_id]
+    @user = User.find(id)
+    if current_user.admin && @user.admin
+      @work_on_list = Attendance.where(day: Date.today, leaving_time: nil).where.not(attendance_time: nil).order(user_id: "ASC")
+    else
+     flash[:warning] = "他ユーザーを閲覧することはできません。"
+     redirect_to login_url
+    end
   end
 
   private
-    def import_users
-      # 登録処理前のレコード数
-      current_user_count = User.count
-    #   users = []
-    #   # windowsで作られたファイルに対応するので、encoding: "SJIS"を付けている
-    #   CSV.foreach(params[:file].path, headers: true) do |row|
-    #     users << User.new({id: row["id"], name: row["name"], email: row["email"] })
-    #   end
-    #   # importメソッドでバルクインサートできる
-    #   User.import(users)
-      # 何レコード登録できたかを返す
-      User.count - current_user_count  
-    #   binding.pry
-    end
-  
     def user_params
-      params.require(:user).permit(:name,:email,:user_card_id ,:employee_number ,:password,
+      params.require(:user).permit(:name,:email,:uid ,:employee_number ,:password,
                                    :password_confirmation,:affiliation,
-                                   :specified_work_time,:specified_end_time ,:basic_work_time)
+                                   :designated_work_start_time,:designated_work_end_time ,:basic_work_time)
     end
     
     def users_basic_params
-      params.require(:user).permit(:name,:email,:user_card_id ,:employee_number ,:password,
-                                   :affiliation,:specified_work_time,:specified_end_time ,:basic_work_time)
+      params.require(:user).permit(:name,:email,:uid ,:employee_number ,:password,:password_confirmation,
+                                   :affiliation,:designated_work_start_time,:designated_work_end_time ,:basic_work_time)
     end
                 
     # beforeアクション

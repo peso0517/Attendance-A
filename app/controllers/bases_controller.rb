@@ -5,12 +5,12 @@ before_action :admin_user,     only: [:index,:create,:edit_base_info,:update_bas
   def index
     id = cookies[:user_id]
     @user = User.find(id)
-    if current_user.admin && current_user?(@user) || logged_in?
+    if current_user.admin && @user.admin
       @bases = Base.paginate(page: params[:page])
-    else 
-     flash[:warning] = "管理者以外は、拠点情報を閲覧することができません！"
-　　 redirect_to current_user
-   end
+    else
+     flash[:warning] = "他ユーザーを閲覧することはできません。"
+　　 redirect_to login_url
+    end
   end
   
 #   def new
@@ -50,12 +50,11 @@ before_action :admin_user,     only: [:index,:create,:edit_base_info,:update_bas
 
   private    
     def base_new_params
-      params.permit(:base_name,:base_type)
+      params.permit(:id,:base_name,:base_type)
     end
   
-    
     def base_params
-      params.require(:base).permit(:base_name,:base_type)
+      params.require(:base).permit(:id,:base_name,:base_type)
     end
     
   # 管理者かどうか確認

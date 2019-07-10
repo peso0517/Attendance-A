@@ -35,17 +35,17 @@
       <!--2行目：日付（曜日）-->      
        <td><%= @youbi[attendance.day.wday] %></td>
       <!--3行目：残業申請時間-->
-       <td><%= attendance.overtime_plan.to_s(:hour) %>:<%= attendance.overtime_plan.min %></td>
+       <td><%= attendance.overtime_plan.to_s(:hour) %>:<%= attendance.overtime_plan.to_s(:min) %></td>
 　　　<!--4行目：勤務終了時間-->
        <td>
-         <%= user.specified_end_time.to_s(:hour) %>:<%= user.specified_end_time.min %>
+         <%= user.designated_work_end_time.to_s(:hour) %>:<%= user.designated_work_end_time.to_s(:min) %>
        </td>
       <!--5行目：時間外勤務時間-->
        <td>
         <% if attendance.check === 1 %>
-          <%= format("%.1f", (Time.new(attendance.day.year,attendance.day.month,attendance.day.day,attendance.overtime_plan.hour,attendance.overtime_plan.min) + 1.day - Time.new(attendance.day.year,attendance.day.month,attendance.day.day,user.specified_end_time.hour,user.specified_end_time.min))/3600) %>
+          <%= format("%.1f", (Time.new(attendance.day.year,attendance.day.month,attendance.day.day,attendance.overtime_plan.hour,attendance.overtime_plan.min) + 1.day - Time.new(attendance.day.year,attendance.day.month,attendance.day.day,user.designated_work_end_time.hour,user.designated_work_end_time.min))/3600) %>
         <% else %> 
-          <%= format("%.1f", (Time.new(attendance.day.year,attendance.day.month,attendance.day.day,attendance.overtime_plan.hour,attendance.overtime_plan.min) - Time.new(attendance.day.year,attendance.day.month,attendance.day.day,user.specified_end_time.hour,user.specified_end_time.min))/3600) %>
+          <%= format("%.1f", (Time.new(attendance.day.year,attendance.day.month,attendance.day.day,attendance.overtime_plan.hour,attendance.overtime_plan.min) - Time.new(attendance.day.year,attendance.day.month,attendance.day.day,user.designated_work_end_time.hour,user.designated_work_end_time.min))/3600) %>
         <% end %>
        </td>
       <!--6行目：業務処理内容-->

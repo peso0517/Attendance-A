@@ -51,7 +51,6 @@
 </div>
 
 <script>
-// if(document.URL.match(/attendance_log/)) {
   $(document).ready(function() {
     // $(".attendance-info").empty();
   var user_id = $('input[name="user_id_set"]').val();
@@ -82,70 +81,16 @@
   
    $('#reset-btn').on('click', function(){
      year = current.getFullYear();
-  // 月 0（1月）～11（12月） 
      month = current.getMonth() + 1;
      sendData(user_id,year,month);
      $('#current_year').text(year);
      $('#current_month').text(month);
   });
-  
-  
 });
- 
   //ajaxにより、情報を取得
   let sendData = (user_id,year,month) => {
     $.get("<%= log_search_path %>",{id: user_id,year: year,month: month},
         function(data){});
     }
     
-    // 以下では、だめだった
-    // $.ajax({
-    //   url:'/log_search',
-    //   type:'GET',
-    //   data:{
-    //           id: user_id,
-    //           year:year,
-    //           month:month},
-    //   dataType: 'html'})
-    //   .done((data) => {
-    //       console.log(data);
-        // $(".attendance-info").append(`<thead><tr><th>日付</th><th>変更前出社時間</th><th>変更前退社時間</th><th>変更後出社時間</th><th>変更後退社時間</th><th>指示者</th><th>承認日</th></tr></thead>`);
-        //   for (let i = 0; i < data.length; i++){
-        //       // 日付
-        //       attendance_day = data[i].day;
-        //       // 変更前出社
-        //       before_edit_attendance_time = "";
-        //       if (data[i].before_edit_attendance_time != null) {
-        //         var beat = new Date(data[i].before_edit_attendance_time);
-        //         before_edit_attendance_hour = beat.getHours();
-        //         before_edit_attendance_min = beat.getMinutes();
-        //         before_edit_attendance_time = before_edit_attendance_hour + "時" + before_edit_attendance_min + "分";
-        //       }
-        //       // 変更前退社
-        //       before_edit_leaving_time = "";
-        //       if (data[i].before_edit_leaving_time != null) {
-        //         var belt = new Date(data[i].before_edit_leaving_time);
-        //         before_edit_leaving_hour = belt.getHours();
-        //         before_edit_leaving_min = belt.getMinutes();
-        //         before_edit_leaving_time = before_edit_leaving_hour + "時" + before_edit_leaving_min + "分";
-        //       }
-        //       // 変更後出社
-        //       var eat = new Date(data[i].edit_attendance_time);
-        //       edit_attendance_hour = eat.getHours();
-        //       edit_attendance_min = eat.getMinutes();
-        //       edit_attendance_time = edit_attendance_hour + "時" + edit_attendance_min + "分";
-        //       // 変更後退社
-        //       var elt = new Date(data[i].edit_leaving_time);
-        //       edit_leaving_hour = elt.getHours();
-        //       edit_leaving_min = elt.getMinutes();
-        //       edit_leaving_time = edit_leaving_hour + "時" + edit_leaving_min + "分";
-        //       // 指示者
-              
-        //       //項目名
-        //   $(".attendance-info").append(`<tbody><tr><td>${attendance_day}</td><td>${before_edit_attendance_time}</td><td>${before_edit_leaving_time}</td><td>${edit_attendance_time}</td><td>${edit_leaving_time}</td><td></td><td></td><td></td><td></td></tr></tbody>`);
-        //   }    
-    // }).fail((data) => {
-    //   console.log("ajax失敗");
-    // });
-  // }
 </script>
