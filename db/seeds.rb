@@ -6,7 +6,7 @@
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
 #   Character.create(name: 'Luke', movie: movies.first)
-User.create!(id: 1,
+User.create!(id: 100,
              name:  "管理者",
              email: "attendance@gmail.com",
              affiliation: "管理者",
@@ -18,7 +18,7 @@ User.create!(id: 1,
              activated: true,
              activated_at: Time.zone.now)
 
-User.create!(id: 2,
+User.create!(id: 101,
              name:  "上長A",
              email: "attendance-system1@gmail.com",
              affiliation: "上長",
@@ -33,7 +33,7 @@ User.create!(id: 2,
              activated: true,
              activated_at: Time.zone.now)
              
-User.create!(id: 3,
+User.create!(id: 102,
              name:  "上長B",
              email: "attendance-system2@gmail.com",
              affiliation: "上長",
@@ -48,7 +48,7 @@ User.create!(id: 3,
              activated: true,
              activated_at: Time.zone.now)
              
-User.create!(id: 4,
+User.create!(id: 103,
              name:  "一般ユーザーA",
              email: "attendance-system3@gmail.com",
              affiliation: "サンプル一般",
@@ -62,7 +62,7 @@ User.create!(id: 4,
              activated: true,
              activated_at: Time.zone.now)
              
-User.create!(id: 5,
+User.create!(id: 104,
              name:  "一般ユーザーB",
              email: "attendance-system4@gmail.com",
              affiliation: "サンプル一般",
