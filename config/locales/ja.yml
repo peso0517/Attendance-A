@@ -14,6 +14,7 @@ ja:
       admin: &admin
         name: 名前
         email: メールアドレス
+        employee_number: 社員番号
         password: パスワード
         password_confirmation: パスワード確認
       user:

@@ -19,10 +19,11 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
 
  def show
     #管理者ユーザーは取得できない
-    id = cookies[:user_id]
-    @user_confirm = User.find(id)
+
     #ユーザー情報を取得
     @user = User.find(params[:id])
+    id = cookies[:user_id]
+    @user_confirm = User.find(id)
     if @user_confirm.admin? || @user.admin
       if @user != @user_confirm
         flash[:warning] = "他ユーザーを閲覧することはできません。"
@@ -126,8 +127,8 @@ before_action :admin_user,     only: [:destroy, :edit_basic_info]
   def create
     @user = User.new(user_params)
     if @user.save
+       cookies[:user_id] = @user.id
        log_in @user
-       flash[:success]="ようこそ"
        redirect_to @user
     else
       render 'new'

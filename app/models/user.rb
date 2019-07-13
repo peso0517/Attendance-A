@@ -5,10 +5,14 @@ class User < ApplicationRecord
   #dependent: :destroy
   attr_accessor :remember_token, :activation_token, :reset_tokens
   before_create :create_activation_digest
-  validates :name,  presence: true, length: { maximum: 50 }
+  
   VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
   has_secure_password
-  validates :password, presence: true, length: { minimum: 6 }, allow_nil: true
+  validates :name,  presence: true, length: { maximum: 50 }
+  validates :email, presence: true, uniqueness: true, format: { with: VALID_EMAIL_REGEX }
+  validates :password, presence: true, length: { minimum: 6 }, allow_nil: true,confirmation: true
+  validates :employee_number,  presence: true
+  
   require 'csv'
   
   def self.import(file)

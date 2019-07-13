@@ -20,10 +20,10 @@
             
             
             <ul class="dropdown-menu">
-            <% if !admin?(@user) %>
-              <li><%= link_to "勤怠表示画面", current_user %></li>
-            <% end %>
-              <li><%= link_to "個人情報編集画面", edit_user_path(current_user)  %></li>
+            <%# if !admin?(@user) %>
+              <%# link_to "勤怠表示画面", current_user %>
+            <%# end %>
+              <li><%#= link_to "個人情報編集画面", edit_user_path(current_user)  %></li>
 
               <li class="divider"></li>
               <li>
