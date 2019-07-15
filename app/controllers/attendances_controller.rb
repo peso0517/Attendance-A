@@ -92,7 +92,7 @@ class AttendancesController < ApplicationController
     @overtime_apply = params[:overtime_plan].in_time_zone
     if  params[:overtime_plan].blank? || params[:business_process].blank? || params[:authority_user_id].blank?
      flash[:danger] = "未入力項目がありました。再度申請してください。"
-    elsif params[:check] == "0" && ((@overtime_apply.hour + @overtime_apply.min)) - (@user.designated_work_end_time.hour + @user.designated_work_end_time.min) < 0
+    elsif params[:check] == "0" && (@overtime_apply.hour + @overtime_apply.min) - (@user.designated_work_end_time.hour + @user.designated_work_end_time.min) < 0
      flash[:danger] = "不正な時間入力がありました。再度申請してください。"
     else
      @one_overtime_apply.update_attributes(overtime_plan: params[:overtime_plan],

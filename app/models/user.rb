@@ -12,6 +12,9 @@ class User < ApplicationRecord
   validates :email, presence: true, uniqueness: true, format: { with: VALID_EMAIL_REGEX }
   validates :password, presence: true, length: { minimum: 6 }, allow_nil: true,confirmation: true
   validates :employee_number,  presence: true
+  validates :designated_work_start_time,  presence: true
+  validates :designated_work_end_time,  presence: true
+  validates :basic_work_time,  presence: true
   
   require 'csv'
   
